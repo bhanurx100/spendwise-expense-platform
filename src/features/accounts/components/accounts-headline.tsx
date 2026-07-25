@@ -1,23 +1,47 @@
 'use client'
 
+/**
+ * Accounts totals block — size pass.
+ *
+ * Everything was oversized: the balance figure, the distribution rows, and
+ * especially the Net Worth / Available / Card Due tiles. All reduced
+ * (smaller type scale, tighter padding). Also now uses `.glass-hero`
+ * directly instead of a hand-rolled color-mix background, and the
+ * allocation bar's segment widths are clamped so they can never overflow
+ * 100% (they could before — Bank alone can exceed the net "Total Balance"
+ * once card dues are subtracted, producing >100% widths that silently
+ * swallowed the Wallet/Cash segments).
+ */
+
 import { AnimatedAmount } from '@/src/shared/components/animated-number'
 import { formatCurrency } from '@/src/shared/lib/format'
 import type { BalanceSummary } from '@/src/types/transaction'
 import { accounts } from '@/src/lib/data'
 import { motion } from 'framer-motion'
-import { Landmark, CreditCard, Wallet, WalletCards } from 'lucide-react'
+import { Landmark, CreditCard, Wallet, WalletCards, type LucideIcon } from 'lucide-react'
 
-/**
- * Accounts page hero — premium headline with balance, distribution, and metrics.
- */
+const TYPE_META: ReadonlyArray<{ type: string; icon: LucideIcon; label: string; opacity: number }> = [
+  { type: 'bank', icon: Landmark, label: 'Bank', opacity: 1 },
+  { type: 'credit-card', icon: CreditCard, label: 'Credit Card', opacity: 0.72 },
+  { type: 'wallet', icon: Wallet, label: 'Wallet', opacity: 0.48 },
+  { type: 'cash', icon: WalletCards, label: 'Cash', opacity: 0.28 },
+]
+
+function TypeIcon({ Icon }: { Icon: LucideIcon }) {
+  return (
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-tile)] bg-[var(--surface-elevated)] text-[var(--foreground)]">
+      <Icon className="size-3.5" aria-hidden="true" />
+    </span>
+  )
+}
+
 export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
-  // Calculate distribution by account type (excluding linked accounts)
   const realAccounts = accounts.filter((a) => !a.linkedAccountId)
-  const totalBalance = realAccounts.reduce((sum, a) => {
-    return a.type === 'credit-card' ? sum - a.balance : sum + a.balance
-  }, 0)
+  const totalBalance = realAccounts.reduce(
+    (sum, a) => (a.type === 'credit-card' ? sum - a.balance : sum + a.balance),
+    0,
+  )
 
-  // Group by type for distribution
   const byType = realAccounts.reduce((acc, a) => {
     const type = a.type === 'debit-card' ? 'bank' : a.type
     if (!acc[type]) acc[type] = { count: 0, balance: 0 }
@@ -26,21 +50,26 @@ export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
     return acc
   }, {} as Record<string, { count: number; balance: number }>)
 
-  // Distribution data with colors
-  const distribution = [
-    { type: 'bank', icon: Landmark, label: 'Bank', color: '#3b82f6', balance: byType.bank?.balance ?? 0, count: byType.bank?.count ?? 0 },
-    { type: 'credit-card', icon: CreditCard, label: 'Credit Card', color: '#06b6d4', balance: byType['credit-card']?.balance ?? 0, count: byType['credit-card']?.count ?? 0 },
-    { type: 'wallet', icon: Wallet, label: 'Wallet', color: '#10b981', balance: byType.wallet?.balance ?? 0, count: byType.wallet?.count ?? 0 },
-    { type: 'cash', icon: WalletCards, label: 'Cash', color: '#f59e0b', balance: byType.cash?.balance ?? 0, count: byType.cash?.count ?? 0 },
-  ].filter((d) => d.balance > 0)
+  const distribution = TYPE_META.map((meta) => ({
+    ...meta,
+    balance: byType[meta.type]?.balance ?? 0,
+    count: byType[meta.type]?.count ?? 0,
+  })).filter((d) => d.balance > 0)
 
-  // Calculate percentages
   const distributionWithPercents = distribution.map((d) => ({
     ...d,
-    percent: Math.round((d.balance / totalBalance) * 100),
+    percent: totalBalance > 0 ? Math.round((d.balance / totalBalance) * 100) : 0,
   }))
 
-  // Calculate metrics
+  // Clamp so segment widths can never sum past 100% of the bar, regardless
+  // of what the (net-of-dues) percent label says.
+  let remaining = 100
+  const barSegments = distributionWithPercents.map((d) => {
+    const width = Math.max(0, Math.min(d.percent, remaining))
+    remaining -= width
+    return { ...d, width }
+  })
+
   const cardDue = Math.abs(byType['credit-card']?.balance ?? 0)
   const netWorth = totalBalance + cardDue
   const available = totalBalance
@@ -48,91 +77,68 @@ export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
   return (
     <motion.section
       aria-label="Accounts summary"
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-[1.5rem] border border-border bg-card px-[1.125rem] pt-[1.125rem] pb-[1.125rem] shadow-[0_0_20px_rgba(99,102,241,0.08)]"
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="glass-hero p-4"
     >
-      {/* Subtle edge light */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }}
-        aria-hidden="true"
-      />
-
-      <div className="relative flex flex-col gap-[0.875rem]">
-        {/* Balance Section */}
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-[0.5rem] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+      <div className="flex flex-col gap-3">
+        {/* Balance */}
+        <div className="flex flex-col items-center gap-0.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
             Total Balance
           </p>
           <AnimatedAmount
             value={totalBalance}
             currency={summary.currency}
-            className="text-[2.5rem] font-extrabold leading-none tracking-tight sm:text-[2.625rem]"
+            className="text-[1.875rem] font-extrabold leading-none tracking-tight text-[var(--foreground)]"
           />
           {cardDue > 0 && (
-            <p className="text-[0.8125rem] text-muted-foreground">
+            <p className="text-[11px] text-[var(--muted-foreground)]">
               after {formatCurrency(cardDue, summary.currency)} card dues
             </p>
           )}
         </div>
 
-        {/* Distribution Section */}
-        <div className="flex flex-col gap-[0.75rem]">
-          <div className="flex flex-col items-center gap-0.5">
-            <p className="text-[0.875rem] font-semibold text-foreground">
-              Distributed across
-            </p>
-            <p className="text-[1.25rem] font-semibold bg-gradient-to-r from-[#3b82f6] via-[#06b6d4] to-[#10b981] bg-clip-text text-transparent">
-              {realAccounts.length} Accounts
-            </p>
+        {/* Distribution */}
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col items-center gap-0">
+            <p className="text-[11px] font-semibold text-[var(--foreground)]">Distributed across</p>
+            <p className="text-[1rem] font-semibold text-[var(--foreground)]">{realAccounts.length} Accounts</p>
           </div>
 
-          {/* Allocation Bar */}
-          <div className="flex h-2 w-full overflow-hidden rounded-[999px]">
-            {distributionWithPercents.map((d) => (
+          <div className="flex h-1.5 w-full gap-0.5 overflow-hidden rounded-[var(--radius-pill)] bg-[var(--surface-elevated)]">
+            {barSegments.map((d) => (
               <div
                 key={d.type}
-                className="h-full transition-all duration-300"
-                style={{ width: `${d.percent}%`, backgroundColor: d.color }}
+                className="h-full rounded-[var(--radius-pill)] bg-[var(--primary)]"
+                style={{ width: `${d.width}%`, opacity: d.opacity }}
                 aria-label={`${d.label}: ${d.percent}%`}
               />
             ))}
           </div>
 
-          {/* Distribution Rows */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             {distributionWithPercents.map((d) => (
               <motion.div
                 key={d.type}
-                whileHover={{ y: -2 }}
+                whileHover={{ y: -1 }}
                 transition={{ duration: 0.15 }}
-                className="relative flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2"
+                className="relative flex items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-elevated)] px-2 py-1.5"
               >
-                {/* Icon */}
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full"
-                  style={{ backgroundColor: `${d.color}15` }}
-                >
-                  <d.icon className="size-4" style={{ color: d.color }} aria-hidden="true" />
-                </span>
-
-                {/* Title & Subtitle */}
+                <TypeIcon Icon={d.icon} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0">
-                  <span className="text-[0.75rem] font-semibold text-foreground leading-tight">{d.label}</span>
-                  <span className="text-[0.6875rem] text-muted-foreground leading-tight">
+                  <span className="truncate text-[11px] font-semibold leading-tight text-[var(--foreground)]">
+                    {d.label}
+                  </span>
+                  <span className="text-[10px] leading-tight text-[var(--muted-foreground)]">
                     {d.count} account{d.count !== 1 ? 's' : ''}
                   </span>
                 </div>
-
-                {/* Amount */}
-                <span className="text-[1.125rem] font-bold text-foreground tabular-nums leading-none">
+                <span className="text-[13px] font-bold tabular-nums leading-none text-[var(--foreground)]">
                   {formatCurrency(d.balance, summary.currency)}
                 </span>
-
-                {/* Percentage */}
-                <span className="text-[1rem] font-bold text-foreground tabular-nums leading-none" style={{ color: d.color }}>
+                <span className="text-[11px] font-semibold tabular-nums leading-none text-[var(--muted-foreground)]">
                   {d.percent}%
                 </span>
               </motion.div>
@@ -140,32 +146,25 @@ export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
           </div>
         </div>
 
-        {/* Bottom Metrics Cards */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col gap-0.5 rounded-lg border border-border bg-muted/30 p-2">
-            <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              Net Worth
-            </p>
-            <p className="text-[1rem] font-bold text-foreground tabular-nums leading-none">
-              {formatCurrency(netWorth, summary.currency)}
-            </p>
-          </div>
-          <div className="flex flex-col gap-0.5 rounded-lg border border-border bg-muted/30 p-2">
-            <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              Available
-            </p>
-            <p className="text-[1rem] font-bold text-foreground tabular-nums leading-none">
-              {formatCurrency(available, summary.currency)}
-            </p>
-          </div>
-          <div className="flex flex-col gap-0.5 rounded-lg border border-border bg-muted/30 p-2">
-            <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              Card Due
-            </p>
-            <p className="text-[1rem] font-bold text-foreground tabular-nums leading-none">
-              {formatCurrency(cardDue, summary.currency)}
-            </p>
-          </div>
+        {/* Bottom metrics — reduced drastically vs. the prior pass */}
+        <div className="grid grid-cols-3 gap-1.5">
+          {[
+            { label: 'Net Worth', value: netWorth },
+            { label: 'Available', value: available },
+            { label: 'Card Due', value: cardDue },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="flex flex-col gap-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-elevated)] px-2 py-1.5"
+            >
+              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+                {m.label}
+              </p>
+              <p className="text-[13px] font-bold tabular-nums leading-tight text-[var(--foreground)]">
+                {formatCurrency(m.value, summary.currency)}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </motion.section>
