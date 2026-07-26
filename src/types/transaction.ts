@@ -26,6 +26,7 @@ export interface BalanceSummary {
   /** Human-readable sync status derived from account provider timestamps. */
   lastSyncedLabel: string
   currency: Currency
+  availableToSpend?: number
 }
 
 export interface MoneySummary {
@@ -79,6 +80,8 @@ export interface CategorySummary {
   budget?: number
   trend?: number
   merchantCount?: number
+  transactionCount?: number
+  highestSpend?: { amount: number; merchant: string }
   group?: 'needs' | 'wants' | 'lifestyle' | 'others'
 }
 
@@ -196,6 +199,7 @@ export interface Bill {
   dueLabel: string
   autopay: boolean
   currency: Currency
+  overdue?: boolean
 }
 
 export interface PortfolioSummary {

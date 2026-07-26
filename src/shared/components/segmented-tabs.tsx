@@ -10,43 +10,15 @@ export interface SegmentedOption {
   label: string
   icon?: LucideIcon
   count?: number
-  /** Active-pill tone — keeps the selection color semantic, not decorative. */
-  tone?: 'primary' | 'positive' | 'negative' | 'info' | 'warning' | 'neutral'
+  /** Active-pill tone — only primary (blue) is used now. */
+  tone?: 'primary'
 }
 
-const toneStyles: Record<
-  NonNullable<SegmentedOption['tone']>,
-  { pill: string; text: string; badge: string }
-> = {
+const toneStyles = {
   primary: {
     pill: 'rgba(124,60,255,0.22)',
     text: 'text-primary-bright',
     badge: 'bg-primary/25 text-primary-bright',
-  },
-  positive: {
-    pill: 'rgba(22,230,161,0.16)',
-    text: 'text-positive',
-    badge: 'bg-positive/20 text-positive',
-  },
-  negative: {
-    pill: 'rgba(255,45,120,0.16)',
-    text: 'text-negative',
-    badge: 'bg-negative/20 text-negative',
-  },
-  info: {
-    pill: 'rgba(20,217,255,0.14)',
-    text: 'text-info',
-    badge: 'bg-info/20 text-info',
-  },
-  warning: {
-    pill: 'rgba(255,170,43,0.14)',
-    text: 'text-warning',
-    badge: 'bg-warning/20 text-warning',
-  },
-  neutral: {
-    pill: 'rgba(255,255,255,0.08)',
-    text: 'text-foreground',
-    badge: 'bg-white/12 text-foreground',
   },
 }
 
@@ -75,7 +47,7 @@ export function SegmentedTabs({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        'glass flex gap-1 overflow-x-auto rounded-full p-0.5 scrollbar-none',
+        'glass inline-flex gap-1 overflow-x-auto rounded-full p-0.5 scrollbar-none',
         className,
       )}
     >
@@ -90,7 +62,7 @@ export function SegmentedTabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(option.id)}
-            className="relative flex min-h-7 flex-1 items-center justify-center gap-1 rounded-full px-3 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-ring"
+            className="relative flex min-h-7 items-center justify-center gap-1 rounded-full px-3 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-ring"
           >
             {active && (
               <motion.span

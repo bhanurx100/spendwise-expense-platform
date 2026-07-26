@@ -16,6 +16,7 @@ import {
   buildCashFlowByPeriod,
   buildCategoryPageSummary,
   buildCategorySummaries,
+  buildCategorySummariesForPeriod,
   buildInsights,
   buildMonthGroups,
   buildMoneySummary,
@@ -555,6 +556,8 @@ export const categoryPageSummary = buildCategoryPageSummary(transactions, INR)
 export const availableMonths = listMonths(transactions)
 export const getCategoriesForMonth = (monthKey: string) =>
   buildCategorySummaries(transactions, categoryMeta, monthKey)
+export const getCategoriesForPeriod = (period: '1M' | '3M' | '6M' | '1Y' | 'All') =>
+  buildCategorySummariesForPeriod(transactions, categoryMeta, period)
 export const getCategoryPageSummaryForMonth = (monthKey: string) =>
   buildCategoryPageSummary(transactions, INR, monthKey)
 

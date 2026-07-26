@@ -16,14 +16,7 @@ const tabs = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const accentByPath: Record<string, string> = {
-    '/': '#3B82F6',
-    '/transactions': '#22D3EE',
-    '/splitpay': '#A855F7',
-    '/categories': '#EC4899',
-    '/accounts': '#6366F1',
-  }
-  const activeAccent = accentByPath[pathname] ?? '#3B82F6'
+  const activeAccent = '#3B82F6'
 
   return (
     <nav

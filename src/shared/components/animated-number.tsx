@@ -11,6 +11,7 @@ interface AnimatedAmountProps {
   signed?: boolean
   className?: string
   hidden?: boolean
+  style?: React.CSSProperties
 }
 
 export function AnimatedAmount({

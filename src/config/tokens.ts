@@ -1,328 +1,237 @@
 /**
  * SplitFin Design Tokens
- * Single source of truth for all visual constants.
- * Dark-only theme. Glassmorphism. Neon accents.
+ * Single source of truth for visual constants. Implements DESIGN_SYSTEM.md v2.0.
+ *
+ * Corrects the prior version, which was "Dark-only theme. Glassmorphism. Neon
+ * accents." with pink/purple/cyan glow shadows and heavy backdrop-blur on every
+ * surface. This system is: dark + light (both required, §01 rule 15), blue +
+ * green only (§06), glow-on-interaction only (§12), and blur reserved for
+ * modals/sheets, never everyday cards (§11).
  */
 
 // ─── Color Palette ──────────────────────────────────────────────────────────
 
 export const colors = {
-  // Background layers
   bg: {
-    /** True black base */
-    base: "#030712",
-    /** Primary surface (cards, sheets) */
-    surface: "rgba(255, 255, 255, 0.04)",
-    /** Elevated surface (modals, popovers) */
-    elevated: "rgba(255, 255, 255, 0.07)",
-    /** Active / hover state */
-    active: "rgba(255, 255, 255, 0.10)",
-    /** Overlay backdrop */
-    overlay: "rgba(3, 7, 18, 0.80)",
+    dark: "#0A0A0C",
+    light: "#F2F2F5", // warm off-white — never pure white, §24
+  },
+  surface: {
+    dark: "#17171A",
+    darkElevated: "#1E1E22",
+    light: "#FFFFFF",
+    lightElevated: "#FAFAFC",
   },
 
-  // Neon brand accents
+  /** The only 2 accent colors in the app. */
   accent: {
-    /** Pink — primary CTA, danger actions */
-    pink: "#FF008C",
-    pinkMuted: "rgba(255, 0, 140, 0.15)",
-    pinkGlow: "rgba(255, 0, 140, 0.35)",
-    pinkBorder: "rgba(255, 0, 140, 0.40)",
-
-    /** Purple — groups, secondary actions */
-    purple: "#7C3AED",
-    purpleMuted: "rgba(124, 58, 237, 0.15)",
-    purpleGlow: "rgba(124, 58, 237, 0.35)",
-    purpleBorder: "rgba(124, 58, 237, 0.40)",
-
-    /** Cyan — income, positive balances, confirmation */
-    cyan: "#00FFD0",
-    cyanMuted: "rgba(0, 255, 208, 0.12)",
-    cyanGlow: "rgba(0, 255, 208, 0.30)",
-    cyanBorder: "rgba(0, 255, 208, 0.35)",
+    blue: "#3B82F6",
+    blueSubtleDark: "rgba(59, 130, 246, 0.12)",   // Focus Bubble / selected-state fill
+    blueSubtleLight: "rgba(59, 130, 246, 0.08)",
+    green: "#34D399", // dark-mode positive
+    greenLight: "#16A34A", // light-mode positive (deeper for contrast on white)
   },
 
-  // Semantic colors
-  semantic: {
-    /** Positive / you will receive */
-    positive: "#00FFD0",
-    positiveText: "#00D4AE",
-    /** Negative / you will pay */
-    negative: "#FF4472",
-    negativeText: "#FF6B8F",
-    /** Warning / pending */
-    warning: "#FFB800",
-    warningMuted: "rgba(255, 184, 0, 0.15)",
-    /** Success / settled */
-    success: "#00D68F",
-    successMuted: "rgba(0, 214, 143, 0.15)",
-  },
+  /**
+   * Destructive: irreversible actions (delete account, remove card) and the
+   * "Over budget" status text exception (§18). NEVER a decorative accent,
+   * NEVER an expense-amount color, NEVER a "you owe" color (§06).
+   */
+  destructive: "#EF4444",
 
-  // Text hierarchy
   text: {
-    primary: "#F9FAFB",
-    secondary: "rgba(249, 250, 251, 0.65)",
-    tertiary: "rgba(249, 250, 251, 0.38)",
-    inverse: "#030712",
-    disabled: "rgba(249, 250, 251, 0.25)",
+    primaryDark: "#F5F5F7",
+    secondaryDark: "#9A9AA2",
+    tertiaryDark: "#6B6B72",
+    primaryLight: "#1C1C1E",
+    secondaryLight: "#6E6E76",
+    tertiaryLight: "#A0A0A8",
   },
 
-  // Glass borders
   border: {
-    subtle: "rgba(255, 255, 255, 0.06)",
-    default: "rgba(255, 255, 255, 0.10)",
-    strong: "rgba(255, 255, 255, 0.18)",
-    focus: "rgba(124, 58, 237, 0.60)",
+    hairlineDark: "rgba(255, 255, 255, 0.08)",
+    hairlineLight: "rgba(0, 0, 0, 0.08)",
+    dividerDark: "rgba(255, 255, 255, 0.06)", // thinner — rows inside one card
+    dividerLight: "rgba(0, 0, 0, 0.06)",
+    strongDark: "rgba(255, 255, 255, 0.14)",
+    strongLight: "rgba(0, 0, 0, 0.14)",
   },
 } as const
 
 // ─── Typography ──────────────────────────────────────────────────────────────
+// Matches DESIGN_SYSTEM.md §07 exactly — do not add sizes outside this scale.
 
 export const typography = {
   fontFamily: {
     sans: "'Inter', system-ui, -apple-system, sans-serif",
-    mono: "'JetBrains Mono', 'Fira Code', monospace",
   },
-
-  // Scale (rem)
-  size: {
-    "2xs": "0.625rem",  // 10px
-    xs:   "0.75rem",   // 12px
-    sm:   "0.875rem",  // 14px
-    base: "1rem",      // 16px
-    lg:   "1.125rem",  // 18px
-    xl:   "1.25rem",   // 20px
-    "2xl":"1.5rem",    // 24px
-    "3xl":"1.875rem",  // 30px
-    "4xl":"2.25rem",   // 36px
-    "5xl":"3rem",      // 48px
-  },
-
-  // Weight
-  weight: {
-    regular: "400",
-    medium:  "500",
-    semibold:"600",
-    bold:    "700",
-    black:   "900",
-  },
-
-  // Line height
-  leading: {
-    tight:  "1.15",
-    snug:   "1.3",
-    normal: "1.5",
-    relaxed:"1.65",
-  },
-
-  // Letter spacing
-  tracking: {
-    tight:  "-0.025em",
-    normal: "0em",
-    wide:   "0.025em",
-    wider:  "0.06em",
-    widest: "0.12em",
+  scale: {
+    display:     { size: "34px", weight: 700, lineHeight: "40px" }, // Net Worth hero only
+    heading:     { size: "28px", weight: 700, lineHeight: "34px" }, // page titles
+    title:       { size: "20px", weight: 600, lineHeight: "26px" }, // section headers
+    body:        { size: "16px", weight: 400, lineHeight: "22px" },
+    bodyMedium:  { size: "16px", weight: 600, lineHeight: "22px" },
+    caption:     { size: "13px", weight: 400, lineHeight: "18px" }, // metadata, timestamps
+    label:       { size: "12px", weight: 500, lineHeight: "16px" }, // "Quick actions"
+    amount:      { size: "18px", weight: 600, lineHeight: "24px", tabularNums: true },
   },
 } as const
 
 // ─── Spacing ─────────────────────────────────────────────────────────────────
+// 4px base grid — DESIGN_SYSTEM.md §08
 
 export const spacing = {
-  0:    "0px",
-  0.5:  "2px",
-  1:    "4px",
-  1.5:  "6px",
-  2:    "8px",
-  2.5:  "10px",
-  3:    "12px",
-  4:    "16px",
-  5:    "20px",
-  6:    "24px",
-  7:    "28px",
-  8:    "32px",
-  10:   "40px",
-  12:   "48px",
-  16:   "64px",
-  20:   "80px",
+  1: "4px", 2: "8px", 3: "12px", 4: "16px", 5: "20px",
+  6: "24px", 7: "32px", 8: "40px", 9: "48px", 10: "64px",
 } as const
 
 // ─── Border Radius ────────────────────────────────────────────────────────────
+// DESIGN_SYSTEM.md §09 — 4 values only. No 6/10/18/32 in between.
 
 export const radius = {
-  none: "0px",
-  sm:   "6px",
-  md:   "10px",
-  lg:   "14px",
-  xl:   "18px",
-  "2xl":"24px",
-  "3xl":"32px",
-  full: "9999px",
+  tile: "14px",  // icon tiles
+  card: "20px",  // standard cards, list items
+  cardLg: "24px", // hero cards, physical card carousel
+  pill: "9999px", // chips, segments, buttons
 } as const
 
-// ─── Shadows & Glows ─────────────────────────────────────────────────────────
+// ─── Shadows ─────────────────────────────────────────────────────────────────
+// Neutral only at rest. --glow-press is the ONLY colored shadow in the app,
+// and it only ever applies for the duration of a press. No glowPink/glowPurple/
+// glowCyan/innerPink/innerPurple — those encoded a per-brand-hue glow system
+// that DESIGN_SYSTEM.md §26 removes entirely.
 
 export const shadows = {
-  /** Subtle card lift */
-  sm: "0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)",
-  /** Default card */
-  md: "0 4px 16px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4)",
-  /** Elevated panels */
-  lg: "0 8px 32px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4)",
-  /** Bottom sheets / modals */
-  xl: "0 20px 60px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5)",
+  cardDark: "0 8px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
+  cardLight: "0 4px 16px rgba(15,23,42,0.06)",
+  tileDark: "0 2px 8px rgba(0,0,0,0.35)",
+  tileLight: "0 2px 8px rgba(15,23,42,0.05)",
 
-  // Neon glow shadows
-  glowPink:   "0 0 20px rgba(255, 0, 140, 0.4), 0 0 60px rgba(255, 0, 140, 0.15)",
-  glowPurple: "0 0 20px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.15)",
-  glowCyan:   "0 0 20px rgba(0, 255, 208, 0.35), 0 0 60px rgba(0, 255, 208, 0.12)",
-
-  // Inner glow for active states
-  innerPink:   "inset 0 0 12px rgba(255, 0, 140, 0.15)",
-  innerPurple: "inset 0 0 12px rgba(124, 58, 237, 0.15)",
+  /** The ONE interaction glow in the entire app. Applies on :active / whileTap only. */
+  glowPress: "0 0 0 3px rgba(59, 130, 246, 0.18)",
 } as const
 
 // ─── Motion Tokens ────────────────────────────────────────────────────────────
+// DESIGN_SYSTEM.md §12
 
 export const motion = {
-  // Durations (ms)
   duration: {
-    instant:  80,
-    fast:    150,
-    normal:  250,
-    slow:    400,
-    slower:  600,
-    crawl:   800,
+    fast: 150,     // press states, chip toggle
+    standard: 250, // page-level transitions, card expand
+    slow: 400,     // hero reveals, first-load sequences
   },
 
-  // Easing curves
   ease: {
-    /** Snappy interactions — button press, toggle */
-    snap:    [0.23, 1, 0.32, 1] as const,
-    /** Standard entrance */
-    enter:   [0.16, 1, 0.3, 1] as const,
-    /** Standard exit */
-    exit:    [0.5, 0, 0.75, 0] as const,
-    /** Spring-feel (non-spring easing) */
-    spring:  [0.34, 1.56, 0.64, 1] as const,
-    /** Smooth deceleration */
-    decel:   [0, 0, 0.2, 1] as const,
-    /** Smooth acceleration */
-    accel:   [0.4, 0, 1, 1] as const,
-    /** Linear */
-    linear:  [0, 0, 1, 1] as const,
+    standard: [0.4, 0, 0.2, 1] as const,
   },
 
-  // Framer Motion spring configs
-  spring: {
-    /** Snappy, no wobble */
-    stiff:  { type: "spring" as const, stiffness: 500, damping: 40 },
-    /** Smooth, slight bounce */
-    gentle: { type: "spring" as const, stiffness: 280, damping: 28 },
-    /** Bouncy (use sparingly) */
-    bouncy: { type: "spring" as const, stiffness: 300, damping: 20 },
-    /** Sheet slide up */
-    sheet:  { type: "spring" as const, stiffness: 320, damping: 34 },
+  /**
+   * Focus Bubble — the tvOS-style morphing selection indicator, §12.1.
+   * Used exclusively by GlassSegment / GlassNavIndicator via Framer Motion's
+   * `layoutId`. Do not use a bouncier spring than this anywhere else in the
+   * app — this is the one place overshoot is intentional.
+   */
+  focusBubble: { type: "spring" as const, stiffness: 300, damping: 30 },
+
+  /** Standard card entrance — first mount only, never on re-render. */
+  cardEntrance: {
+    initial: { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const } },
   },
 
-  // Standard animation variants for Framer Motion
-  variants: {
-    fadeIn: {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit:    { opacity: 0 },
-    },
-    slideUp: {
-      initial: { opacity: 0, y: 24 },
-      animate: { opacity: 1, y: 0 },
-      exit:    { opacity: 0, y: 16 },
-    },
-    slideDown: {
-      initial: { opacity: 0, y: -16 },
-      animate: { opacity: 1, y: 0 },
-      exit:    { opacity: 0, y: -16 },
-    },
-    scaleIn: {
-      initial: { opacity: 0, scale: 0.92 },
-      animate: { opacity: 1, scale: 1 },
-      exit:    { opacity: 0, scale: 0.95 },
-    },
-    sheet: {
-      initial: { y: "100%", opacity: 0 },
-      animate: { y: 0, opacity: 1 },
-      exit:    { y: "100%", opacity: 0 },
-    },
+  /** Standard press feedback for any interactive surface. */
+  press: {
+    scale: 0.98,
+    transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] as const },
+  },
+
+  /** Sheet / modal open — the only surfaces allowed real backdrop-blur, §11. */
+  sheet: {
+    initial: { y: "100%", opacity: 0 },
+    animate: { y: 0, opacity: 1, transition: { type: "spring" as const, stiffness: 320, damping: 34 } },
+    exit: { y: "100%", opacity: 0 },
+  },
+
+  /** Chart entrance — staggered, first load only. */
+  chartBar: {
+    stagger: 20,   // ms between bars
+    total: 400,    // ms total sequence
+  },
+
+  /** Chart tooltip follow — spring-eases to the touch point rather than snapping. */
+  tooltip: {
+    transition: { duration: 0.15 },
+    followSpring: { type: "spring" as const, stiffness: 300, damping: 30 },
   },
 } as const
 
 // ─── Glass Presets ────────────────────────────────────────────────────────────
+// Corrects the prior version's heavy blur-everywhere approach. Per §10/§11:
+// everyday cards are OPAQUE with a sheen, not blurred — blur is reserved
+// strictly for surfaces that sit in front of other content (modals, sheets).
 
 export const glass = {
-  /** Default card glass */
+  /** Default card — opaque, hairline border, neutral shadow. No blur. */
   card: {
-    background: "rgba(255, 255, 255, 0.04)",
-    backdropFilter: "blur(24px) saturate(160%)",
-    WebkitBackdropFilter: "blur(24px) saturate(160%)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: "var(--card)",
+    border: "1px solid var(--border)",
+    boxShadow: "var(--shadow-card)",
   },
-  /** Elevated panel (sheets, modals) */
-  elevated: {
-    background: "rgba(255, 255, 255, 0.07)",
-    backdropFilter: "blur(40px) saturate(180%)",
-    WebkitBackdropFilter: "blur(40px) saturate(180%)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+  /** Icon tile — opaque, hairline border, small neutral shadow. No blur. */
+  tile: {
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    boxShadow: "var(--shadow-tile)",
   },
-  /** Input / form element */
+  /**
+   * Modal / bottom sheet — the ONLY surfaces permitted real backdrop-blur,
+   * and only ONE blur layer may be active on screen at a time (§11/§23).
+   */
+  sheet: {
+    background: "var(--popover)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid var(--border-strong)",
+  },
+  /** Input / form element — opaque, no blur. */
   input: {
-    background: "rgba(255, 255, 255, 0.06)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    border: "1px solid rgba(255, 255, 255, 0.10)",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
   },
-  /** Navigation bar */
+  /** Bottom navigation — opaque with a soft top shadow, no blur (it never sits over dynamic scrolling content that needs blur separation on this app's layout). */
   nav: {
-    background: "rgba(3, 7, 18, 0.85)",
-    backdropFilter: "blur(32px) saturate(180%)",
-    WebkitBackdropFilter: "blur(32px) saturate(180%)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: "var(--card)",
+    border: "1px solid var(--border)",
+    boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
   },
 } as const
 
 // ─── Z-Index Scale ────────────────────────────────────────────────────────────
 
 export const zIndex = {
-  below:   -1,
-  base:     0,
-  raised:  10,
-  dropdown:20,
-  sticky:  30,
-  overlay: 40,
-  modal:   50,
-  toast:   60,
-  tooltip: 70,
+  below: -1, base: 0, raised: 10, dropdown: 20,
+  sticky: 30, overlay: 40, modal: 50, toast: 60, tooltip: 70,
 } as const
 
 // ─── Breakpoints ──────────────────────────────────────────────────────────────
 
 export const breakpoints = {
-  sm:  "390px",   // min phone
-  md:  "480px",   // large phone
-  lg:  "768px",   // tablet
-  xl:  "1024px",  // desktop
+  sm: "375px",  // small phones, §22
+  md: "430px",  // regular phones
+  lg: "768px",  // tablets (future)
+  xl: "1024px", // desktop (future)
 } as const
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 export const layout = {
-  /** Maximum width of mobile shell */
   maxWidth: "430px",
-  /** Safe area padding bottom (for home indicator) */
   safeAreaBottom: "env(safe-area-inset-bottom, 20px)",
-  /** Bottom nav height */
   navHeight: "76px",
-  /** Header height */
   headerHeight: "60px",
-  /** Page horizontal padding */
   pagePaddingX: "20px",
-  /** Standard page top padding */
+  pagePaddingXSmall: "16px", // <375px, §22
   pagePaddingTop: "16px",
+  /** Scroll containers must always clear the fixed bottom nav — §22/§23. */
+  scrollBottomPadding: "calc(76px + env(safe-area-inset-bottom, 0px) + 32px)",
 } as const

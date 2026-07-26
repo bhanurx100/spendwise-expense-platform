@@ -368,6 +368,14 @@ export function buildCategorySummaries(
         .reduce((sum, t) => sum + t.amount, 0)
       const merchants: string[] = []
       for (const t of txns) if (!merchants.includes(t.subtitle)) merchants.push(t.subtitle)
+      
+      // Calculate highest spend
+      let highestSpend: { amount: number; merchant: string } | undefined
+      if (txns.length > 0) {
+        const highest = txns.reduce((max, t) => (t.amount > max.amount ? t : max), txns[0])
+        highestSpend = { amount: highest.amount, merchant: highest.merchant }
+      }
+      
       return {
         id: c.id,
         name: c.name,
@@ -379,6 +387,83 @@ export function buildCategorySummaries(
         percent: totalOut > 0 ? Math.round((amount / totalOut) * 1000) / 10 : 0,
         trend: monthOverMonth(amount, lastAmount),
         merchantCount: merchants.length,
+        transactionCount: txns.length,
+        highestSpend,
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+}
+
+/** Aggregate category summaries across multiple months for period filtering */
+export function buildCategorySummariesForPeriod(
+  transactions: Transaction[],
+  meta: CategoryMeta[],
+  period: '1M' | '3M' | '6M' | '1Y' | 'All',
+): CategorySummary[] {
+  const current = currentMonthOf(transactions)
+  const allMonths = listMonths(transactions)
+  const monthsToInclude = period === 'All' 
+    ? allMonths.length 
+    : period === '1M' ? 1 
+    : period === '3M' ? 3 
+    : period === '6M' ? 6 
+    : 12
+  
+  const includedMonths: MonthRef[] = []
+  for (let i = 0; i < Math.min(monthsToInclude, allMonths.length); i++) {
+    const d = new Date(Date.UTC(current.year, current.month - i, 1))
+    includedMonths.push(monthRefOf(d.toISOString().slice(0, 10)))
+  }
+  
+  // Aggregate transactions across all included months
+  const periodTransactions: Transaction[] = []
+  for (const monthRef of includedMonths) {
+    periodTransactions.push(...monthTransactions(transactions, monthRef))
+  }
+  
+  // Calculate previous period for trend comparison
+  const previousPeriodTransactions: Transaction[] = []
+  for (let i = monthsToInclude; i < monthsToInclude * 2; i++) {
+    const d = new Date(Date.UTC(current.year, current.month - i, 1))
+    const monthRef = monthRefOf(d.toISOString().slice(0, 10))
+    if (allMonths.some(m => m.key === monthRef.key)) {
+      previousPeriodTransactions.push(...monthTransactions(transactions, monthRef))
+    }
+  }
+  
+  const totalOut = flowTotals(periodTransactions).outflow
+  const lastOut = flowTotals(previousPeriodTransactions).outflow
+  
+  return meta
+    .map((c) => {
+      const txns = periodTransactions.filter((t) => t.type === 'expense' && t.category === c.name)
+      const amount = txns.reduce((sum, t) => sum + t.amount, 0)
+      const lastAmount = previousPeriodTransactions
+        .filter((t) => t.type === 'expense' && t.category === c.name)
+        .reduce((sum, t) => sum + t.amount, 0)
+      const merchants: string[] = []
+      for (const t of txns) if (!merchants.includes(t.subtitle)) merchants.push(t.subtitle)
+      
+      // Calculate highest spend
+      let highestSpend: { amount: number; merchant: string } | undefined
+      if (txns.length > 0) {
+        const highest = txns.reduce((max, t) => (t.amount > max.amount ? t : max), txns[0])
+        highestSpend = { amount: highest.amount, merchant: highest.merchant }
+      }
+      
+      return {
+        id: c.id,
+        name: c.name,
+        icon: c.icon,
+        color: c.color,
+        budget: c.budget,
+        group: c.group,
+        amount,
+        percent: totalOut > 0 ? Math.round((amount / totalOut) * 1000) / 10 : 0,
+        trend: monthOverMonth(amount, lastAmount),
+        merchantCount: merchants.length,
+        transactionCount: txns.length,
+        highestSpend,
       }
     })
     .sort((a, b) => b.amount - a.amount)

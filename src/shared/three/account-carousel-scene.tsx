@@ -491,9 +491,10 @@ export default function AccountCarouselScene({
 
   // Cleanup pointer capture on unmount
   useEffect(() => {
+    const currentState = state.current
     return () => {
-      if (state.current.dragging) {
-        state.current.dragging = false
+      if (currentState.dragging) {
+        currentState.dragging = false
       }
     }
   }, [])
