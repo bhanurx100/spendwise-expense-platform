@@ -10,17 +10,17 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 const toneClass: Record<Insight['tone'], string> = {
-  positive: 'text-positive',
-  negative: 'text-negative',
-  info: 'text-info',
-  warning: 'text-warning',
+  positive: 'text-[var(--primary)]',
+  negative: 'text-[var(--primary)]',
+  info: 'text-[var(--primary)]',
+  warning: 'text-[var(--primary)]',
 }
 
 const toneDot: Record<Insight['tone'], string> = {
-  positive: 'bg-positive',
-  negative: 'bg-negative',
-  info: 'bg-info',
-  warning: 'bg-warning',
+  positive: 'bg-[var(--primary)]',
+  negative: 'bg-[var(--primary)]',
+  info: 'bg-[var(--primary)]',
+  warning: 'bg-[var(--primary)]',
 }
 
 /**
@@ -48,7 +48,6 @@ export function InsightCard({ insights }: { insights: Insight[] }) {
       {!dismissed && (
         <motion.div exit={{ opacity: 0, height: 0, marginTop: -16 }} transition={{ duration: 0.3 }}>
           <GlassCard
-            strong
             className="relative flex items-start gap-4 overflow-hidden p-5"
             style={{ borderColor: 'rgba(59,130,246,0.42)', boxShadow: '0 0 16px rgba(59,130,246,0.22)' }}
           >
@@ -57,7 +56,7 @@ export function InsightCard({ insights }: { insights: Insight[] }) {
                 'flex size-10 shrink-0 items-center justify-center rounded-2xl border border-white/8',
                 toneClass[insight.tone],
               )}
-              style={{ boxShadow: '0 0 16px color-mix(in srgb, var(--info) 10%, transparent)' }}
+              style={{ boxShadow: '0 0 16px color-mix(in srgb, var(--primary) 10%, transparent)' }}
             >
               <CategoryIcon name={insight.icon} className="size-5" />
             </span>

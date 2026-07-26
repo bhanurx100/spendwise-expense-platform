@@ -19,8 +19,8 @@ export function MoneySummaryRow({ summary }: { summary: MoneySummary }) {
       label: 'Money In',
       value: summary.moneyIn,
       icon: ArrowDownLeft,
-      tone: 'text-info',
-      iconBg: 'bg-info/12 text-info',
+      tone: 'text-[var(--primary)]',
+      iconBg: 'bg-[var(--primary)]/12 text-[var(--primary)]',
       href: '/transactions?type=income',
       signed: false,
     },
@@ -29,8 +29,8 @@ export function MoneySummaryRow({ summary }: { summary: MoneySummary }) {
       label: 'Money Out',
       value: summary.moneyOut,
       icon: ArrowUpRight,
-      tone: 'text-negative',
-      iconBg: 'bg-negative/12 text-negative',
+      tone: 'text-[var(--primary)]',
+      iconBg: 'bg-[var(--primary)]/12 text-[var(--primary)]',
       href: '/transactions?type=expense',
       signed: false,
     },
@@ -39,8 +39,8 @@ export function MoneySummaryRow({ summary }: { summary: MoneySummary }) {
       label: 'Net Balance',
       value: summary.netBalance,
       icon: Wallet,
-      tone: netPositive ? 'text-positive' : 'text-negative',
-      iconBg: netPositive ? 'bg-positive/12 text-positive' : 'bg-negative/12 text-negative',
+      tone: 'text-[var(--primary)]',
+      iconBg: 'bg-[var(--primary)]/12 text-[var(--primary)]',
       href: '/transactions',
       signed: true,
     },
@@ -48,7 +48,7 @@ export function MoneySummaryRow({ summary }: { summary: MoneySummary }) {
 
   return (
     <section aria-label="Monthly money summary">
-      <GlassCard strong radius="2xl" padding="lg" className="relative overflow-hidden">
+      <GlassCard radius="2xl" padding="lg" className="relative overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{

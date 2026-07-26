@@ -1,72 +1,49 @@
-'use client'
+"use client"
 
-import { OverviewHeader } from '@/src/features/dashboard/components/overview-header'
-import { HeroCard } from '@/src/features/dashboard/components/hero-card'
-import { AccountsPreview } from '@/src/features/dashboard/sections/accounts-preview'
-import { CashFlowCard } from '@/src/features/dashboard/sections/cash-flow-card'
-import { CategoriesPreview } from '@/src/features/dashboard/sections/categories-preview'
-import { InsightCard } from '@/src/features/dashboard/sections/insight-card'
-import { SplitPayPreview } from '@/src/features/dashboard/sections/splitpay-preview'
+import { OverviewHeader } from "@/src/features/dashboard/components/overview-header"
+import { HeroCard } from "@/src/features/dashboard/components/hero-card"
+import { CashFlowCard } from "@/src/features/dashboard/sections/cash-flow-card"
+import { UpcomingPaymentsCard, defaultPaymentIcon } from "@/src/features/dashboard/sections/upcoming-bills-card"
+import { balanceSummary, cashFlowByPeriod, greeting } from "@/src/lib/data"
+import { MobileShell } from "@/src/shared/components/mobile-shell"
+import { motion } from "framer-motion"
 import {
-  accounts,
-  balanceSummary,
-  cashFlowByPeriod,
-  categories,
-  greeting,
-  insights,
-  splitMembers,
-  splitPaySummary,
-} from '@/src/lib/data'
-import { MobileShell } from '@/src/shared/components/mobile-shell'
-import { QuickActions, type QuickAction } from '@/src/shared/components/quick-actions'
-import { motion } from 'framer-motion'
-import { Plus, ScanLine, Sparkles, Users } from 'lucide-react'
+  CreditCard,
+  Wifi,
+} from "lucide-react"
 
-const quickActions: QuickAction[] = [
-  { id: 'add', icon: Plus, label: 'Add Money', hint: 'Any account', tone: 'positive', href: '/accounts' },
-  { id: 'scan', icon: ScanLine, label: 'Scan Bill', hint: 'Auto capture', tone: 'info', href: '/transactions?action=scan' },
-  { id: 'split', icon: Users, label: 'Split', hint: 'With friends', tone: 'warning', href: '/splitpay' },
-  { id: 'insights', icon: Sparkles, label: 'Insights', hint: 'Spend smart', tone: 'info', href: '/categories' },
+const upcomingPayments = [
+  { id: "b1", name: "Electricity Board", icon: defaultPaymentIcon, dueLabel: "Due tomorrow", amount: 2140 },
+  { id: "b2", name: "Broadband — ACT Fibernet", icon: Wifi, dueLabel: "Due in 4 days", amount: 999 },
+  { id: "b3", name: "Credit Card — HDFC", icon: CreditCard, dueLabel: "Due 2 Jul", amount: 12480, overdue: true },
 ]
 
 const sectionMotion = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-30px' },
-  transition: { type: 'spring' as const, stiffness: 200, damping: 26 },
+  viewport: { once: true, margin: "-30px" },
+  transition: { type: "spring" as const, stiffness: 200, damping: 26 },
 }
 
 export default function OverviewPage() {
   return (
     <MobileShell>
       <OverviewHeader greeting={greeting} />
-      {/* Hero — canvas with typography and 3D bank, plus balance card */}
+
       <motion.div {...sectionMotion}>
-        <HeroCard summary={balanceSummary} greeting={greeting} />
+        <HeroCard
+          summary={balanceSummary}
+          greeting={greeting}
+          insight="You're spending 14% less than last month. Great job keeping your finances in control!"
+        />
       </motion.div>
-      {/* Quick actions */}
-      <motion.section aria-label="Quick actions" {...sectionMotion}>
-        <QuickActions actions={quickActions} />
-      </motion.section>
-      {/* Cash flow (→ Transactions) */}
+
       <motion.div {...sectionMotion}>
         <CashFlowCard seriesByPeriod={cashFlowByPeriod} currency={balanceSummary.currency} />
       </motion.div>
-      {/* Top categories (→ Categories / selected category) */}
+
       <motion.div {...sectionMotion}>
-        <CategoriesPreview categories={categories} />
-      </motion.div>
-      {/* Accounts preview (→ Accounts / account detail) */}
-      <motion.div {...sectionMotion}>
-        <AccountsPreview accounts={accounts} />
-      </motion.div>
-      {/* SplitPay preview (→ SplitPay) */}
-      <motion.div {...sectionMotion}>
-        <SplitPayPreview summary={splitPaySummary} members={splitMembers} />
-      </motion.div>
-      {/* Live insights from the insight engine */}
-      <motion.div {...sectionMotion}>
-        <InsightCard insights={insights} />
+        <UpcomingPaymentsCard payments={upcomingPayments} currency={balanceSummary.currency} />
       </motion.div>
     </MobileShell>
   )
