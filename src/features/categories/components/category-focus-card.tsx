@@ -4,7 +4,7 @@ import { CategoryIcon } from '@/src/shared/components/category-icon'
 import { formatCurrency } from '@/src/shared/lib/format'
 import type { CategorySummary, Currency } from '@/src/types/transaction'
 import { motion } from 'framer-motion'
-import { TrendingDown, TrendingUp, ArrowDownRight } from 'lucide-react'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 
 interface CategoryFocusCardProps {
     category: CategorySummary | undefined
@@ -26,7 +26,7 @@ export function CategoryFocusCard({ category, currency, period }: CategoryFocusC
     const budgetUsed = category.budget ? Math.min((category.amount / category.budget) * 100, 100) : null
     const status = budgetUsed == null ? null : budgetUsed >= 100 ? 'over' : budgetUsed >= 80 ? 'near' : null
     const trendUp = (category.trend ?? 0) > 0
-    const avgTransaction = category.transactionCount > 0 ? category.amount / category.transactionCount : 0
+    const avgTransaction = (category.transactionCount ?? 0) > 0 ? category.amount / (category.transactionCount ?? 0) : 0
 
     return (
         <motion.div
@@ -105,7 +105,7 @@ export function CategoryFocusCard({ category, currency, period }: CategoryFocusC
                         <motion.div
                             className="h-full rounded-full"
                             style={{
-                                backgroundColor: status === 'over' ? 'var(--destructive)' : status === 'near' ? 'var(--primary)' : 'var(--primary)'
+                                backgroundColor: 'var(--primary)'
                             }}
                             initial={{ width: 0 }}
                             animate={{ width: `${budgetUsed}%` }}
@@ -113,7 +113,7 @@ export function CategoryFocusCard({ category, currency, period }: CategoryFocusC
                         />
                     </div>
                     {status && (
-                        <p className="mt-1.5 text-[11px] font-semibold" style={{ color: status === 'over' ? 'var(--destructive)' : 'var(--primary)' }}>
+                        <p className="mt-1.5 text-[11px] font-semibold" style={{ color: 'var(--primary)' }}>
                             {status === 'over' ? 'Over budget' : 'Near limit'}
                         </p>
                     )}
@@ -126,7 +126,7 @@ export function CategoryFocusCard({ category, currency, period }: CategoryFocusC
                     <p className="text-xs text-[var(--muted-foreground)]">vs Last Month</p>
                     <div
                         className="flex items-center gap-1.5 text-xs font-semibold"
-                        style={{ color: trendUp ? 'var(--destructive)' : 'var(--positive)' }}
+                        style={{ color: 'var(--primary)' }}
                     >
                         {trendUp ? (
                             <TrendingUp className="size-3.5" aria-hidden="true" />

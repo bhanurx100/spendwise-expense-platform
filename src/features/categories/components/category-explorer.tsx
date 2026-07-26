@@ -142,7 +142,7 @@ export function CategoryExplorer({ categories, currency, period, onPeriodChange 
       <GlassSegment
         options={periodOptions}
         value={period}
-        onChange={onPeriodChange}
+        onChange={(value) => onPeriodChange(value as '1M' | '3M' | '6M' | '1Y' | 'All')}
         layoutId="category-period-filter"
       />
 

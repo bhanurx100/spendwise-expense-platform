@@ -8,10 +8,10 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 const toneChip: Record<Insight['tone'], string> = {
-  positive: 'bg-positive/15 text-positive',
-  negative: 'bg-negative/15 text-negative',
-  info: 'bg-info/15 text-info',
-  warning: 'bg-warning/15 text-warning',
+  positive: 'bg-[var(--primary)]/15 text-[var(--primary)]',
+  negative: 'bg-[var(--primary)]/15 text-[var(--primary)]',
+  info: 'bg-[var(--primary)]/15 text-[var(--primary)]',
+  warning: 'bg-[var(--primary)]/15 text-[var(--primary)]',
 }
 
 /**
@@ -21,7 +21,7 @@ const toneChip: Record<Insight['tone'], string> = {
  */
 export function SpendingInsight({ insight }: { insight: Insight }) {
   const body = (
-    <GlassCard strong interactive className="flex items-center gap-4 p-4">
+    <GlassCard className="flex items-center gap-4 p-4">
       <span
         className={cn(
           'glow-breathe flex size-12 shrink-0 items-center justify-center rounded-2xl',
