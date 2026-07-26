@@ -2,54 +2,33 @@
 
 import { AnimatedAmount } from '@/src/shared/components/animated-number'
 import { GlassCard } from '@/src/shared/components/glass-card'
-import { SegmentedTabs, type SegmentedOption } from '@/src/shared/components/segmented-tabs'
+import { GlassSegment, type GlassSegmentOption } from '@/src/shared/components/glass-segment'
 import { springs } from '@/src/shared/lib/motion'
-import { cn } from '@/src/lib/utils'
 import type { SplitGroup, SplitMember } from '@/src/types/transaction'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowUpRight, Check } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { memo } from 'react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MemberList — corrected per PAGE_SPECIFICATIONS.md §05 / §06.
+//
+// - Filter row is GlassSegment (Focus Bubble), the same shared component
+//   used everywhere else in the app — no per-page static-highlight filter.
+// - "you-owe" renders neutral, "owes-you" renders --positive (green), and
+//   "settled" is muted. No pink/cyan/purple glow, ring, or gradient avatar.
+// - Avatars are a flat monochrome tile — direction is communicated by the
+//   icon + label, not by avatar color (accessibility color-independence,
+//   DESIGN_SYSTEM.md §21).
+// ─────────────────────────────────────────────────────────────────────────────
+
 const directionMeta: Record<
   SplitMember['direction'],
-  {
-    label: string
-    tone: 'negative' | 'positive' | 'neutral'
-    amountClass: string
-    chip: string
-    glow: 'pink' | 'cyan' | 'purple'
-    ring: string
-    avatarGradient: string
-  }
+  { label: string; amountColor: string; captionColor: string }
 > = {
-  'you-owe': {
-    label: 'You owe',
-    tone: 'negative',
-    amountClass: 'text-negative',
-    chip: 'bg-negative/12 text-negative',
-    glow: 'pink',
-    ring: 'rgba(255,45,120,0.45)',
-    avatarGradient: 'linear-gradient(135deg, rgba(255,45,120,0.35), rgba(255,45,120,0.08))',
-  },
-  'owes-you': {
-    label: 'Owes you',
-    tone: 'positive',
-    amountClass: 'text-positive',
-    chip: 'bg-positive/12 text-positive',
-    glow: 'cyan',
-    ring: 'rgba(22,230,161,0.45)',
-    avatarGradient: 'linear-gradient(135deg, rgba(22,230,161,0.32), rgba(22,230,161,0.08))',
-  },
-  settled: {
-    label: 'Settled up',
-    tone: 'neutral',
-    amountClass: 'text-muted-foreground',
-    chip: 'bg-white/8 text-muted-foreground',
-    glow: 'purple',
-    ring: 'rgba(255,255,255,0.16)',
-    avatarGradient: 'linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))',
-  },
+  'you-owe': { label: 'You owe', amountColor: 'var(--foreground)', captionColor: 'var(--muted-foreground)' },
+  'owes-you': { label: 'Owes you', amountColor: 'var(--positive)', captionColor: 'var(--positive)' },
+  settled: { label: 'Settled up', amountColor: 'var(--muted-foreground)', captionColor: 'var(--muted-foreground)' },
 }
 
 function DirectionIcon({ direction }: { direction: SplitMember['direction'] }) {
@@ -72,27 +51,12 @@ export const MemberList = memo(function MemberList({
     [filter, members],
   )
 
-  const filterOptions = useMemo<SegmentedOption[]>(
+  const filterOptions = useMemo<GlassSegmentOption[]>(
     () => [
-      { id: 'all', label: 'All', count: members.length, tone: 'primary' },
-      {
-        id: 'you-owe',
-        label: 'You owe',
-        count: members.filter((m) => m.direction === 'you-owe').length,
-        tone: 'negative',
-      },
-      {
-        id: 'owes-you',
-        label: "You're owed",
-        count: members.filter((m) => m.direction === 'owes-you').length,
-        tone: 'positive',
-      },
-      {
-        id: 'settled',
-        label: 'Settled',
-        count: members.filter((m) => m.direction === 'settled').length,
-        tone: 'neutral',
-      },
+      { value: 'all', label: 'All', count: members.length },
+      { value: 'you-owe', label: 'You owe', count: members.filter((m) => m.direction === 'you-owe').length },
+      { value: 'owes-you', label: "You're owed", count: members.filter((m) => m.direction === 'owes-you').length },
+      { value: 'settled', label: 'Settled', count: members.filter((m) => m.direction === 'settled').length },
     ],
     [members],
   )
@@ -107,19 +71,21 @@ export const MemberList = memo(function MemberList({
   }, [members, groups])
 
   return (
-    <section aria-label="People you split with" className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold">You&apos;re involved in</h2>
+    <section aria-label="People you split with" className="flex flex-col gap-3">
+      <h2 className="text-base font-bold text-[var(--card-foreground)]">You&apos;re involved in</h2>
 
-      <SegmentedTabs
-        options={filterOptions}
-        value={filter}
-        onChange={setFilter}
-        layoutId="member-filter-tab"
-        ariaLabel="Filter people by balance direction"
-      />
+      <div className="w-full overflow-x-auto scrollbar-none">
+        <GlassSegment
+          options={filterOptions}
+          value={filter}
+          onChange={setFilter}
+          layoutId="splitpay-member-filter"
+          fullWidth={false}
+        />
+      </div>
 
       {visible.length > 0 ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-2.5">
           <AnimatePresence mode="popLayout">
             {visible.map((member, i) => {
               const meta = directionMeta[member.direction]
@@ -128,85 +94,47 @@ export const MemberList = memo(function MemberList({
                 <motion.li
                   key={member.id}
                   layout
-                  initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                  initial={{ opacity: 0, y: 10, scale: 0.99 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ ...springs.soft, delay: i * 0.05 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ ...springs.soft, delay: i * 0.04 }}
                 >
                   <GlassCard
                     interactive
-                    pressable
-                    hoverGlow={meta.glow}
-                    className="group relative w-full cursor-pointer overflow-hidden p-4"
-                    style={{ borderColor: 'rgba(168,85,247,0.42)', boxShadow: '0 0 16px rgba(168,85,247,0.22)' }}
+                    radius="card"
+                    padding="sm"
+                    className="flex items-center gap-3 cursor-pointer"
                     role="button"
                     aria-label={`${member.name} — ${meta.label}`}
                   >
-                    {/* Direction-colored edge light */}
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-y-3 left-0 w-[3px] rounded-full opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-                      style={{ background: meta.ring, boxShadow: `0 0 10px ${meta.ring}` }}
-                    />
+                    {/* Monochrome avatar tile — direction is icon + text, not color */}
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-tile)] bg-[var(--surface-elevated)] text-sm font-semibold text-[var(--foreground)]">
+                      {member.avatar}
+                    </span>
 
-                    <div className="flex items-center gap-3.5 pl-1.5">
-                      {/* Premium avatar — gradient glass with status glow */}
-                      <motion.span
-                        whileHover={{ scale: 1.1, rotate: -3 }}
-                        transition={springs.bouncy}
-                        className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-foreground"
-                        style={{
-                          background: meta.avatarGradient,
-                          boxShadow: `0 0 0 1px ${meta.ring}, 0 6px 16px rgba(0,0,0,0.35), 0 0 16px ${meta.ring}30`,
-                        }}
-                      >
-                        {/* Glass top light */}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[var(--card-foreground)]">{member.name}</p>
+                      <div className="mt-0.5 flex items-center gap-1.5">
                         <span
-                          aria-hidden
-                          className="pointer-events-none absolute inset-0 rounded-2xl"
-                          style={{
-                            background:
-                              'linear-gradient(180deg, rgba(255,255,255,0.18), transparent 55%)',
-                          }}
-                        />
-                        <span className="relative">{member.avatar}</span>
-                      </motion.span>
-
-                      {/* Person + status */}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold">{member.name}</p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <span
-                            className={cn(
-                              'flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold',
-                              meta.chip,
-                            )}
-                          >
-                            <DirectionIcon direction={member.direction} />
-                            {meta.label}
-                          </span>
-                          {sharedGroups > 0 && (
-                            <span className="text-[10px] text-muted-foreground">
-                              {sharedGroups} {sharedGroups === 1 ? 'group' : 'groups'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Amount — the strongest element */}
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <AnimatedAmount
-                          value={member.netBalance}
-                          className={cn('text-lg font-extrabold tabular-nums', meta.amountClass)}
-                        />
-                        <motion.span
-                          className="text-muted-foreground transition-colors duration-300 group-hover:text-foreground"
-                          variants={{ rest: { x: 0 }, hover: { x: 3 } }}
+                          className="flex items-center gap-1 text-[11px] font-medium"
+                          style={{ color: meta.captionColor }}
                         >
-                          <ArrowUpRight className="size-4" aria-hidden="true" />
-                        </motion.span>
+                          <DirectionIcon direction={member.direction} />
+                          {meta.label}
+                        </span>
+                        {sharedGroups > 0 && (
+                          <span className="text-[11px] text-[var(--muted-foreground)]">
+                            · {sharedGroups} {sharedGroups === 1 ? 'group' : 'groups'}
+                          </span>
+                        )}
                       </div>
                     </div>
+
+                    <AnimatedAmount
+                      value={member.netBalance}
+                      className="shrink-0 text-sm font-bold tabular-nums"
+                      style={{ color: meta.amountColor }}
+                    />
                   </GlassCard>
                 </motion.li>
               )
@@ -214,15 +142,10 @@ export const MemberList = memo(function MemberList({
           </AnimatePresence>
         </ul>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={springs.soft}
-          className="glass rounded-2xl p-6 text-center"
-        >
-          <p className="text-sm font-medium">All settled up</p>
-          <p className="mt-1 text-xs text-muted-foreground">Nobody here — every balance is clear.</p>
-        </motion.div>
+        <GlassCard radius="card" padding="lg" animated className="flex flex-col items-center gap-1 text-center">
+          <p className="text-sm font-semibold text-[var(--card-foreground)]">All settled up</p>
+          <p className="text-xs text-[var(--muted-foreground)]">Nobody here — every balance is clear.</p>
+        </GlassCard>
       )}
     </section>
   )

@@ -1,54 +1,45 @@
 'use client'
 
+import { GlassCard } from '@/src/shared/components/glass-card'
 import { springs } from '@/src/shared/lib/motion'
 import { motion } from 'framer-motion'
 import { ArrowRight, Zap } from 'lucide-react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SettleBanner — one GlassCard, one accent (blue). No idle glow (glow is
+// press-only per DESIGN_SYSTEM.md §05.9 / --glow-press), no purple/cyan
+// gradient wash. The CTA button is allowed to sit in solid --primary since
+// it's the page's single interactive call-to-action, not decoration.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function SettleBanner() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ type: 'spring', stiffness: 240, damping: 26 }}
-      className="relative overflow-hidden rounded-2xl border border-primary/30 p-[1px]"
-      style={{
-        background: 'linear-gradient(135deg, rgba(124,60,255,0.35), rgba(20,217,255,0.12), rgba(124,60,255,0.05))',
-      }}
+      viewport={{ once: true, margin: '-20px' }}
+      transition={springs.soft}
     >
-      {/* Ambient motion glow */}
-      <motion.span
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-y-8 w-24 blur-2xl"
-        style={{ background: 'rgba(155,92,255,0.25)' }}
-        animate={{ x: ['-20%', '420%'] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
-      />
-      <div className="relative flex items-center gap-4 rounded-[15px] bg-[rgba(10,8,26,0.72)] p-4 backdrop-blur-xl">
-        <motion.span
-          whileHover={{ scale: 1.1, rotate: -6 }}
-          transition={springs.bouncy}
-          className="glow-breathe flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary"
-        >
+      <GlassCard radius="card" padding="md" className="flex items-center gap-3.5">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-tile)] bg-[var(--surface-elevated)] text-[var(--foreground)]">
           <Zap className="size-5" aria-hidden="true" />
-        </motion.span>
+        </span>
+
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold">Settle up instantly</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-            Use UPI to settle your dues in a click
-          </p>
+          <p className="text-sm font-semibold text-[var(--card-foreground)]">Settle up instantly</p>
+          <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">Use UPI to settle your dues in one tap</p>
         </div>
+
         <motion.button
           type="button"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.94 }}
+          whileTap={{ scale: 0.96 }}
           transition={springs.snappy}
-          className="glow-primary flex min-h-11 shrink-0 items-center gap-1.5 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground focus-visible:outline-2 focus-visible:outline-ring"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] focus-visible:outline-2 focus-visible:outline-[var(--ring)] focus-visible:outline-offset-2"
         >
           Settle Now
           <ArrowRight className="size-4" aria-hidden="true" />
         </motion.button>
-      </div>
+      </GlassCard>
     </motion.div>
   )
 }
