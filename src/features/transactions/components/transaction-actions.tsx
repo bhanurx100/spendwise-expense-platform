@@ -4,10 +4,10 @@ import { QuickActions, type QuickAction } from '@/src/shared/components/quick-ac
 import { Camera, Download, Plus, Upload } from 'lucide-react'
 
 const actions: QuickAction[] = [
-  { id: 'import', icon: Upload, label: 'Import', hint: 'CSV / UPI', tone: 'info' },
+  { id: 'import', icon: Upload, label: 'Import', hint: 'CSV / UPI', tone: 'primary' },
   { id: 'scan', icon: Camera, label: 'Scan Bill', hint: 'Auto capture', tone: 'primary' },
-  { id: 'add', icon: Plus, label: 'Add', hint: 'Transaction', tone: 'positive' },
-  { id: 'export', icon: Download, label: 'Export', hint: 'Statement', tone: 'warning' },
+  { id: 'add', icon: Plus, label: 'Add', hint: 'Transaction', tone: 'primary' },
+  { id: 'export', icon: Download, label: 'Export', hint: 'Statement', tone: 'primary' },
 ]
 
 /**

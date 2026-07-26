@@ -40,10 +40,10 @@ function TransactionsContent() {
     const count = (pred: (t: (typeof all)[number]) => boolean) => all.filter(pred).length
     return [
       { id: 'all', label: 'All', icon: LayoutGrid, count: all.length, tone: 'primary' },
-      { id: 'income', label: 'Income', icon: ArrowDownLeft, count: count((t) => t.type === 'income' || t.type === 'refund'), tone: 'positive' },
-      { id: 'expense', label: 'Expense', icon: ArrowUpRight, count: count((t) => t.type === 'expense'), tone: 'negative' },
-      { id: 'transfer', label: 'Transfer', icon: ArrowLeftRight, count: count((t) => t.type === 'transfer'), tone: 'info' },
-      { id: 'refund', label: 'Refund', icon: RotateCcw, count: count((t) => t.type === 'refund'), tone: 'warning' },
+      { id: 'income', label: 'Income', icon: ArrowDownLeft, count: count((t) => t.type === 'income' || t.type === 'refund'), tone: 'primary' },
+      { id: 'expense', label: 'Expense', icon: ArrowUpRight, count: count((t) => t.type === 'expense'), tone: 'primary' },
+      { id: 'transfer', label: 'Transfer', icon: ArrowLeftRight, count: count((t) => t.type === 'transfer'), tone: 'primary' },
+      { id: 'refund', label: 'Refund', icon: RotateCcw, count: count((t) => t.type === 'refund'), tone: 'primary' },
     ]
   }, [])
 
