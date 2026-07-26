@@ -73,9 +73,6 @@ export function PortfolioSummarySection({
       </div>
 
       <GlassCard
-        strong
-        interactive
-        hoverGlow="purple"
         className="flex flex-col gap-5 p-5"
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -165,9 +162,8 @@ export function PortfolioSummarySection({
                       type="button"
                       onMouseEnter={() => setHoveredId(slice.id)}
                       onMouseLeave={() => setHoveredId(null)}
-                      className={`flex min-h-9 w-full items-center gap-2 rounded-lg px-2 text-left transition-all duration-300 hover:bg-glass focus-visible:outline-2 focus-visible:outline-ring ${
-                        dim ? 'opacity-40' : ''
-                      }`}
+                      className={`flex min-h-9 w-full items-center gap-2 rounded-lg px-2 text-left transition-all duration-300 hover:bg-glass focus-visible:outline-2 focus-visible:outline-ring ${dim ? 'opacity-40' : ''
+                        }`}
                     >
                       <span
                         aria-hidden="true"
