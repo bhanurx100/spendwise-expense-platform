@@ -1,7 +1,7 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import type { PropsWithChildren } from "react";
 
+import { AuthProvider } from "@/src/auth/components/AuthProvider";
 import { QueryProviders } from "@/src/providers/query-provider";
 import { ThemeProvider } from "@/src/providers/theme-provider";
 
@@ -22,15 +22,15 @@ export const viewport: Viewport = {
 };
 
 /**
- * Root layout — production architecture preserved:
- * - ClerkProvider: required by middleware-protected routes and (auth) pages.
- * - QueryProviders: React Query client for the kept API/feature hooks.
- * - ThemeProvider: Global theme toggle for dark/light mode.
- * Removed: SheetProvider + Toaster (old sheet/toaster UI deleted with the legacy dashboard).
+ * Root layout.
+ * - AuthProvider: replaces ClerkProvider — wraps NextAuth's SessionProvider
+ *   so useAuth() works anywhere in the tree, including layouts below this one.
+ * - QueryProviders: unchanged — React Query client for the kept feature hooks.
+ * - ThemeProvider: unchanged — dark/light mode toggle.
  */
 const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang="en" className="dark bg-background">
         <body className="font-sans antialiased">
           <ThemeProvider>
@@ -38,7 +38,7 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 };
 
