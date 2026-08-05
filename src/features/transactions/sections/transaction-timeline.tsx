@@ -88,7 +88,7 @@ function TransactionRow({
       >
         {/* Leading icon tile — monochrome at rest, always. §13. No colored shadow. */}
         <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground)]">
-          <CategoryIcon name={tx.icon} className="size-5" />
+          <CategoryIcon name={tx.icon} merchant={tx.merchant} className="size-5" />
         </span>
 
         <div className="min-w-0 flex-1">
