@@ -102,29 +102,29 @@ export const CashFlowCard = memo(function CashFlowCard({
   )
 
   return (
-    <GlassCard radius="cardLg" padding="lg" spotlight className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <h2 className="text-lg font-bold text-[var(--foreground)]">Cash Flow</h2>
-          <Info className="size-3.5 text-[var(--muted-foreground)]" aria-hidden="true" />
-        </div>
-        <div className="flex items-center gap-2">
+    <GlassCard radius="cardLg" padding="lg" className="flex flex-col gap-4 pr-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-bold text-[var(--foreground)]">Cash Flow</h2>
+            <Info className="size-3.5 text-[var(--muted-foreground)]" aria-hidden="true" />
+          </div>
           <Link
-            href="/transactions"
+            href="/transactions/calendar"
             className="flex items-center gap-1 rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--surface-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]"
           >
             <CalendarDays className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
             View
             <ChevronRight className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
           </Link>
-          <GlassSegment
-            layoutId="cashflow-period"
-            value={period}
-            onChange={(v) => setPeriod(v as CashFlowPeriod)}
-            fullWidth={false}
-            options={periods.map((p) => ({ value: p, label: p }))}
-          />
         </div>
+        <GlassSegment
+          layoutId="cashflow-period"
+          value={period}
+          onChange={(v) => setPeriod(v as CashFlowPeriod)}
+          fullWidth={false}
+          options={periods.map((p) => ({ value: p, label: p }))}
+        />
       </div>
 
       {chartData.length === 0 ? (

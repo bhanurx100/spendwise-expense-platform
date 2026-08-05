@@ -76,7 +76,7 @@ export function InsightCard({ insights }: { insights: Insight[] }) {
                   {insight.cta && insight.href && (
                     <Link
                       href={insight.href}
-                      className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-lg text-sm font-semibold text-primary transition-colors hover:text-primary-bright focus-visible:outline-2 focus-visible:outline-ring"
+                      className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-lg text-sm font-semibold text-[var(--primary)] transition-colors hover:text-[var(--primary-bright)] focus-visible:outline-2 focus-visible:outline-ring"
                     >
                       {insight.cta}
                       <ChevronRight className="size-4" aria-hidden="true" />
