@@ -16,7 +16,6 @@
 import { AnimatedAmount } from '@/src/shared/components/animated-number'
 import { formatCurrency } from '@/src/shared/lib/format'
 import type { BalanceSummary } from '@/src/types/transaction'
-import { accounts } from '@/src/lib/data'
 import { motion } from 'framer-motion'
 import { Landmark, CreditCard, Wallet, WalletCards, type LucideIcon } from 'lucide-react'
 
@@ -35,18 +34,25 @@ function TypeIcon({ Icon }: { Icon: LucideIcon }) {
   )
 }
 
-export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
-  const realAccounts = accounts.filter((a) => !a.linkedAccountId)
-  const totalBalance = realAccounts.reduce(
-    (sum, a) => (a.type === 'credit-card' ? sum - a.balance : sum + a.balance),
-    0,
-  )
+export function AccountsHeadline({ summary, accounts }: { summary: BalanceSummary; accounts: import('@/src/types/transaction').AccountPreview[] }) {
+  const realAccounts = accounts
 
+  // Canonical numbers — identical to what Overview's Net Worth /
+  // Available to Spend show, because they come from the same `summary`
+  // object (see use-financial-view.ts), not a local recalculation.
+  const totalBalance = summary.totalBalance
+  const netWorth = summary.totalBalance
+  const available = summary.availableToSpend ?? summary.totalBalance
+  const cardDue = summary.creditOutstanding
+
+  // Presentation-only breakdown by account type, for the distribution bar.
+  // `balance` here is a display magnitude for that row of the bar/list —
+  // it never feeds back into totalBalance/netWorth above.
   const byType = realAccounts.reduce((acc, a) => {
     const type = a.type === 'debit-card' ? 'bank' : a.type
     if (!acc[type]) acc[type] = { count: 0, balance: 0 }
     acc[type].count += 1
-    acc[type].balance += a.type === 'credit-card' ? -a.balance : a.balance
+    acc[type].balance += a.type === 'credit-card' ? Math.max(0, -a.balance) : a.balance
     return acc
   }, {} as Record<string, { count: number; balance: number }>)
 
@@ -69,10 +75,6 @@ export function AccountsHeadline({ summary }: { summary: BalanceSummary }) {
     remaining -= width
     return { ...d, width }
   })
-
-  const cardDue = Math.abs(byType['credit-card']?.balance ?? 0)
-  const netWorth = totalBalance + cardDue
-  const available = totalBalance
 
   return (
     <motion.section

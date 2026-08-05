@@ -116,7 +116,7 @@ function CardContent({ account }: { account: CarouselAccount }) {
 
       <div>
         <p className="text-[22px] font-extrabold leading-none tabular-nums text-[var(--foreground)]">
-          {formatCurrency(account.balance, account.currency)}
+          {formatCurrency(isCredit ? Math.abs(account.balance) : account.balance, account.currency)}
         </p>
         <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">{balanceCaption}</p>
       </div>
