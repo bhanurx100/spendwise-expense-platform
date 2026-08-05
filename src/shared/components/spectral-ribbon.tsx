@@ -21,22 +21,22 @@ export function SpectralRibbon({ className }: { className?: string }) {
     >
       <defs>
         <linearGradient id={`rib-v-${id}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#7c3cff" stopOpacity="0" />
-          <stop offset="35%" stopColor="#9b5cff" stopOpacity="0.55" />
-          <stop offset="70%" stopColor="#ff2d78" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#ff2d78" stopOpacity="0" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
+          <stop offset="35%" stopColor="#60a5fa" stopOpacity="0.55" />
+          <stop offset="70%" stopColor="#93c5fd" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
         </linearGradient>
         <linearGradient id={`rib-c-${id}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#14d9ff" stopOpacity="0" />
-          <stop offset="50%" stopColor="#14d9ff" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#7c3cff" stopOpacity="0" />
+          <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
+          <stop offset="50%" stopColor="#2563eb" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
         </linearGradient>
         <filter id={`rib-blur-${id}`} x="-20%" y="-60%" width="140%" height="220%">
           <feGaussianBlur stdDeviation="2.4" />
         </filter>
       </defs>
 
-      {/* Ribbon 1 — violet/magenta */}
+      {/* Ribbon 1 — blue */}
       <path
         d="M0,84 C60,44 110,110 180,74 C246,40 300,96 400,58"
         fill="none"
@@ -75,7 +75,7 @@ export function SpectralRibbon({ className }: { className?: string }) {
         )}
       </path>
 
-      {/* Ribbon 3 — cyan accent */}
+      {/* Ribbon 3 — blue accent */}
       <path
         d="M0,70 C80,96 150,50 220,78 C290,104 340,66 400,84"
         fill="none"
@@ -95,9 +95,9 @@ export function SpectralRibbon({ className }: { className?: string }) {
       </path>
 
       {/* Tiny luminous nodes */}
-      <circle cx="96" cy="72" r="2.4" fill="#9b5cff" opacity="0.8" />
-      <circle cx="212" cy="80" r="2" fill="#14d9ff" opacity="0.7" />
-      <circle cx="318" cy="82" r="2.4" fill="#ff2d78" opacity="0.65" />
+      <circle cx="96" cy="72" r="2.4" fill="#60a5fa" opacity="0.8" />
+      <circle cx="212" cy="80" r="2" fill="#2563eb" opacity="0.7" />
+      <circle cx="318" cy="82" r="2.4" fill="#3b82f6" opacity="0.65" />
     </svg>
   )
 }

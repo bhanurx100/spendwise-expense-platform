@@ -50,7 +50,7 @@ export function FilterChips({
                 : 'border-white/8 text-muted-foreground hover:text-foreground bg-transparent',
             )}
             style={{
-              boxShadow: active ? '0 0 20px rgba(124,60,255,0.15)' : 'none',
+              boxShadow: active ? '0 0 20px rgba(59,130,246,0.15)' : 'none',
             }}
           >
             <span className="relative flex items-center gap-1.5">

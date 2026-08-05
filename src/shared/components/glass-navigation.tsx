@@ -28,6 +28,8 @@ export interface GlassNavItem {
   value: string
   label: string
   icon: React.ReactNode
+  id: string
+  href: string
 }
 
 interface GlassNavigationProps {

@@ -25,12 +25,12 @@ export interface ObjectTheme {
 }
 
 export const OBJECT_THEMES: Record<AccountType, ObjectTheme> = {
-  bank: { base: '#3b1d9e', mid: '#5b3df5', glow: '#8b6cff', accent: '#c0b6ff' },
-  'credit-card': { base: '#0e4b5e', mid: '#0f7ea8', glow: '#14d9ff', accent: '#5eeaff' },
-  'debit-card': { base: '#5e3a0e', mid: '#a87a0f', glow: '#ffaa2b', accent: '#ffc766' },
-  wallet: { base: '#06503c', mid: '#0b9c6e', glow: '#16e6a1', accent: '#5cf0c2' },
-  cash: { base: '#3f520e', mid: '#74a80f', glow: '#c6ff2b', accent: '#e2ff7a' },
-  investment: { base: '#5e0e46', mid: '#a80f6e', glow: '#ff2d78', accent: '#ff7ab0' },
+  bank: { base: '#1e3a8a', mid: '#3b82f6', glow: '#60a5fa', accent: '#93c5fd' },
+  'credit-card': { base: '#1e40af', mid: '#3b82f6', glow: '#60a5fa', accent: '#93c5fd' },
+  'debit-card': { base: '#1e3a8a', mid: '#2563eb', glow: '#3b82f6', accent: '#60a5fa' },
+  wallet: { base: '#1e40af', mid: '#3b82f6', glow: '#60a5fa', accent: '#93c5fd' },
+  cash: { base: '#1e3a8a', mid: '#2563eb', glow: '#3b82f6', accent: '#60a5fa' },
+  investment: { base: '#1e40af', mid: '#3b82f6', glow: '#60a5fa', accent: '#93c5fd' },
 }
 
 /* ------------------------------------------------------------------ */

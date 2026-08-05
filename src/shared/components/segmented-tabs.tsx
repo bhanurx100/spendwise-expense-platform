@@ -16,9 +16,9 @@ export interface SegmentedOption {
 
 const toneStyles = {
   primary: {
-    pill: 'rgba(124,60,255,0.22)',
-    text: 'text-primary-bright',
-    badge: 'bg-primary/25 text-primary-bright',
+    pill: 'rgba(59,130,246,0.22)',
+    text: 'text-[var(--primary)]',
+    badge: 'bg-[var(--primary)]/25 text-[var(--primary)]',
   },
 }
 

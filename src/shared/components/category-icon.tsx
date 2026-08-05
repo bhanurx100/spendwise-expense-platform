@@ -28,6 +28,8 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
+import { getIconColor, getMerchantColor } from '@/src/shared/lib/merchant-colors'
+import { categoryPaletteColor } from '@/src/shared/lib/category-colors'
 
 const icons: Record<string, LucideIcon> = {
   'shopping-bag': ShoppingBag,
@@ -60,10 +62,20 @@ const icons: Record<string, LucideIcon> = {
 export function CategoryIcon({
   name,
   className,
+  color,
+  index,
+  merchant,
 }: {
   name: string
   className?: string
+  color?: string
+  index?: number
+  merchant?: string
 }) {
   const Icon = icons[name] ?? MoreHorizontal
-  return <Icon className={className} aria-hidden="true" />
+
+  // Use provided color, or get from merchant name, or get from icon mapping, or fall back to palette
+  const iconColor = color || (merchant ? getMerchantColor(merchant) : undefined) || getIconColor(name) || (index !== undefined ? categoryPaletteColor(index) : undefined)
+
+  return <Icon className={className} style={iconColor ? { color: iconColor } : undefined} aria-hidden="true" />
 }

@@ -1,23 +1,23 @@
 /**
  * Category color palette — presentation-layer concern.
  *
- * `lib/data.ts` carries content only; distinct visual colors are assigned
+ * Database entities carry content only; distinct visual colors are assigned
  * here, by display position. Categories added or removed later are colored
  * automatically — no data change required.
  */
 export const CATEGORY_PALETTE = [
-  '#ff2d78', // vivid pink
-  '#ffaa2b', // amber
-  '#14d9ff', // cyan
-  '#16e6a1', // emerald
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#10b981', // emerald
+  '#ef4444', // red
+  '#8b5cf6', // purple
+  '#06b6d4', // cyan
+  '#f97316', // orange
+  '#ec4899', // pink
+  '#6366f1', // indigo
+  '#84cc16', // lime
+  '#14b8a6', // teal
   '#a855f7', // violet
-  '#fb7185', // rose
-  '#2dd4bf', // teal
-  '#60a5fa', // sky
-  '#f472b6', // pink
-  '#facc15', // gold
-  '#34d399', // mint
-  '#94a3b8', // slate
 ] as const
 
 export function categoryPaletteColor(index: number): string {

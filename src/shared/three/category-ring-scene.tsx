@@ -208,9 +208,9 @@ function RingComposition({
   return (
     <>
       <ambientLight intensity={0.55} />
-      <directionalLight position={[2, 4, 3]} intensity={1.6} color="#f5f0ff" />
-      <pointLight position={[-3, -1, 2]} intensity={0.6} color="#14d9ff" />
-      <pointLight position={[0, -2.5, 1.5]} intensity={0.7} color="#7c3cff" />
+      <directionalLight position={[2, 4, 3]} intensity={1.6} color="#e6f0ff" />
+      <pointLight position={[-3, -1, 2]} intensity={0.6} color="#3b82f6" />
+      <pointLight position={[0, -2.5, 1.5]} intensity={0.7} color="#60a5fa" />
       <group ref={rig} rotation={[-0.95, 0, 0]}>
         {specs.map((spec) => (
           <RingSegment

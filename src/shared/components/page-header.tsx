@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Layers } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { UserMenu } from '@/src/auth/components/UserMenu'
 
 interface PageHeaderProps {
   title: string
@@ -11,7 +12,6 @@ interface PageHeaderProps {
   actions?: ReactNode
 }
 
-/** Shared 56px product header with the page title in the header bar. */
 export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
     <header aria-label={`${title} page header`}>
@@ -22,7 +22,10 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
           </span>
           <span className="text-[1.625rem] font-semibold tracking-tight">{title}</span>
         </Link>
-        {actions && <div className="flex shrink-0 gap-3">{actions}</div>}
+        <div className="flex shrink-0 items-center gap-3">
+          {actions}
+          <UserMenu />
+        </div>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 8 }}
