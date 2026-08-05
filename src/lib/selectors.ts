@@ -4,7 +4,7 @@
  * Every number shown on any screen is derived here from the raw entity
  * store (accounts + transactions + category metadata + split entities).
  * No component is allowed to invent metrics: pages import the derived
- * payloads from `@/src/lib/data`, which are computed exclusively through
+ * payloads fetched through the API, which are computed exclusively through
  * these functions. Change one transaction and every screen stays in sync.
  */
 
@@ -344,7 +344,6 @@ export interface CategoryMeta {
   id: string
   name: string
   icon: string
-  color: string
   budget?: number
   group?: CategorySummary['group']
 }
@@ -380,7 +379,7 @@ export function buildCategorySummaries(
         id: c.id,
         name: c.name,
         icon: c.icon,
-        color: c.color,
+        // color: c.color,
         budget: c.budget,
         group: c.group,
         amount,
@@ -455,7 +454,7 @@ export function buildCategorySummariesForPeriod(
         id: c.id,
         name: c.name,
         icon: c.icon,
-        color: c.color,
+        //color: c.color,
         budget: c.budget,
         group: c.group,
         amount,
