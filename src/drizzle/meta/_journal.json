@@ -8,6 +8,41 @@
       "when": 1716047941044,
       "tag": "0000_lying_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1780000000000,
+      "tag": "0001_splitpay",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780000100000,
+      "tag": "0002_subcategories",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1780000200000,
+      "tag": "0003_account_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1780000300000,
+      "tag": "0004_indexes_and_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1785579531280,
+      "tag": "0005_fixed_king_bedlam",
+      "breakpoints": true
     }
   ]
 }
