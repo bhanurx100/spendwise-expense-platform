@@ -1,10 +1,40 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { auth } from "@/src/auth/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/"]);
+/**
+ * middleware.ts
+ *
+ * Replaces Clerk's `clerkMiddleware` + `createRouteMatcher(["/"])`, which
+ * only protected the root route. This protects every route under the
+ * (dashboard) group — accounts, categories, transactions, splitpay, and the
+ * overview — while leaving (auth) and any future public/onboarding routes
+ * open. API routes handle their own auth via `requireHonoUser` (see
+ * src/auth/server.ts) since they need JSON 401s, not redirects.
+ */
+const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect();
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
+
+  const isPublic =
+    PUBLIC_ROUTES.some((route) => pathname.startsWith(route)) ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/icon") ||
+    pathname.startsWith("/apple-icon");
+
+  if (isPublic) return NextResponse.next();
+
+  // API routes: let the route handler return its own 401 JSON via
+  // requireHonoUser — a redirect here would break fetch/XHR callers.
+  if (pathname.startsWith("/api")) return NextResponse.next();
+
+  if (!req.auth) {
+    const signInUrl = new URL("/sign-in", req.nextUrl.origin);
+    signInUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(signInUrl);
+  }
 
   return NextResponse.next();
 });
