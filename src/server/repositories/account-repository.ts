@@ -27,7 +27,16 @@ type NameValues = Pick<z.infer<typeof insertAccountSchema>, "name">;
 
 export async function listAccounts(userId: string) {
   return db
-    .select({ id: accounts.id, name: accounts.name })
+    .select({
+      id: accounts.id,
+      name: accounts.name,
+      institution: accounts.institution,
+      type: accounts.type,
+      openingBalance: accounts.openingBalance,
+      maskedNumber: accounts.maskedNumber,
+      isPrimary: accounts.isPrimary,
+      linkedAccountId: accounts.linkedAccountId,
+    })
     .from(accounts)
     .where(eq(accounts.userId, userId));
 }
