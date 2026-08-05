@@ -3,7 +3,7 @@
 import { GroupList } from '@/src/features/splitpay/components/home/group-list'
 import { MemberList } from '@/src/features/splitpay/components/member/member-list'
 import { SettleBanner } from '@/src/features/splitpay/components/home/settle-banner'
-import { splitGroups, splitMembers } from '@/src/lib/data'
+import { useSplitPay } from '@/src/features/splitpay/api/use-splitpay'
 import { formatCurrency } from '@/src/shared/lib/format'
 import { IconButton } from '@/src/shared/components/icon-button'
 import { MobileShell } from '@/src/shared/components/mobile-shell'
@@ -33,6 +33,9 @@ const sectionMotion = {
 }
 
 export default function SplitPayPage() {
+  const { data } = useSplitPay()
+  const splitGroups = useMemo(() => data?.groups ?? [], [data?.groups])
+  const splitMembers = useMemo(() => data?.members ?? [], [data?.members])
   // Net position — a summary strip, not a second GlassHero (Overview already
   // owns the app's one hero). Owed money is the only colored figure here.
   const { netAmount, isOwed, groupCount } = useMemo(() => {
@@ -45,7 +48,7 @@ export default function SplitPayPage() {
     const net = totalOwed - totalOwing
     const activeGroups = splitGroups.filter((g) => g.status !== 'settled').length
     return { netAmount: Math.abs(net), isOwed: net >= 0, groupCount: activeGroups }
-  }, [])
+  }, [splitGroups])
 
   return (
     <MobileShell>

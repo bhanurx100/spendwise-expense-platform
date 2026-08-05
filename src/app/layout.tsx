@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import type { PropsWithChildren } from "react";
 
+import { Toaster } from "sonner";
+
 import { AuthProvider } from "@/src/auth/components/AuthProvider";
 import { QueryProviders } from "@/src/providers/query-provider";
 import { ThemeProvider } from "@/src/providers/theme-provider";
@@ -34,7 +36,10 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
       <html lang="en" className="dark bg-background">
         <body className="font-sans antialiased">
           <ThemeProvider>
-            <QueryProviders>{children}</QueryProviders>
+            <QueryProviders>
+              {children}
+              <Toaster richColors position="top-center" />
+            </QueryProviders>
           </ThemeProvider>
         </body>
       </html>
