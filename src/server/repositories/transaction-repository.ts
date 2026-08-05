@@ -104,11 +104,40 @@ export async function getTransactionById(id: string, userId: string) {
   return row ?? null;
 }
 
+// ── Ownership guard ──────────────────────────────────────────────────────────
+//
+// SECURITY: insertTransaction/insertManyTransactions must never trust a
+// client-supplied accountId without verifying it belongs to the requesting
+// user. This mirrors the WHERE EXISTS pattern already used by update/delete
+// below. Without this check, any authenticated user could create a
+// transaction against ANY account id that exists in the database (IDOR).
+
+export class AccountOwnershipError extends Error {
+  constructor(accountId: string) {
+    super(`Account ${accountId} does not belong to the requesting user.`);
+    this.name = "AccountOwnershipError";
+  }
+}
+
+async function assertOwnsAccount(accountId: string, userId: string): Promise<void> {
+  const [row] = await db
+    .select({ id: accounts.id })
+    .from(accounts)
+    .where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
+
+  if (!row) {
+    throw new AccountOwnershipError(accountId);
+  }
+}
+
 // ── Write ─────────────────────────────────────────────────────────────────────
 
 export async function insertTransaction(
+  userId: string,
   values: Omit<InsertValues, "id">
 ): Promise<typeof transactions.$inferSelect> {
+  await assertOwnsAccount(values.accountId, userId);
+
   const [row] = await db
     .insert(transactions)
     .values({ id: createId(), ...values })
@@ -118,8 +147,28 @@ export async function insertTransaction(
 }
 
 export async function insertManyTransactions(
+  userId: string,
   rows: Omit<InsertValues, "id">[]
 ): Promise<(typeof transactions.$inferSelect)[]> {
+  // Verify every distinct accountId referenced belongs to this user before
+  // inserting any row — an all-or-nothing check, not a partial filter, so
+  // bulk-create can't silently drop rows a client didn't expect to lose.
+  if (rows.length === 0) return [];
+
+  const distinctAccountIds = Array.from(new Set(rows.map((r) => r.accountId)));
+
+  const owned = await db
+    .select({ id: accounts.id })
+    .from(accounts)
+    .where(and(inArray(accounts.id, distinctAccountIds), eq(accounts.userId, userId)));
+
+  const ownedIds = new Set(owned.map((a) => a.id));
+  const unowned = distinctAccountIds.filter((id) => !ownedIds.has(id));
+
+  if (unowned.length > 0) {
+    throw new AccountOwnershipError(unowned[0]);
+  }
+
   return db
     .insert(transactions)
     .values(rows.map((r) => ({ id: createId(), ...r })))

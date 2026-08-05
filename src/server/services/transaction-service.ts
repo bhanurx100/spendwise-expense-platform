@@ -7,7 +7,8 @@
  * - Returns plain objects; routes are responsible for ctx.json().
  */
 
-import { parse, subDays } from "date-fns";
+import { parse, subDays, endOfDay } from "date-fns";
+import { DEFAULT_LOOKBACK_DAYS } from "@/src/lib/date-ranges";
 
 import {
   listTransactions,
@@ -28,9 +29,25 @@ type InsertPayload = z.infer<typeof insertTransactionSchema>;
 
 const DATE_FMT = "yyyy-MM-dd";
 
+// Previously defaulted an absent `from` to the last 30 days, which silently
+// truncated every page that doesn't wire an explicit period selector
+// (Transactions, Dashboard, Accounts all called this with no range at
+// all) — "All Time" further up the stack could never actually show more
+// than 30 days because it relied on omitting `from`, and omission hit
+// this same default. Bumped to a 1-year floor (see lib/date-ranges.ts);
+// callers that need the true full history send an explicit `from` via
+// rangeForPeriod('All'), which never goes through this fallback.
 function resolveDateRange(from?: string, to?: string) {
-  const endDate   = to   ? parse(to,   DATE_FMT, new Date()) : new Date();
-  const startDate = from ? parse(from, DATE_FMT, new Date()) : subDays(endDate, 30);
+  // `to` is parsed as yyyy-MM-dd, which date-fns anchors to 00:00:00 of
+  // that day. Used as-is against `lte(transactions.date, endDate)`, this
+  // excludes every transaction recorded after midnight — i.e. effectively
+  // the entire day. For an explicit `to`, that day must always be fully
+  // included, so the upper bound is normalized to the last instant of
+  // that day (23:59:59.999). The "no explicit `to`" case already means
+  // "up to right now" and needs no adjustment.
+  const parsedTo = to ? parse(to, DATE_FMT, new Date()) : new Date();
+  const endDate   = to ? endOfDay(parsedTo) : parsedTo;
+  const startDate = from ? parse(from, DATE_FMT, new Date()) : subDays(endDate, DEFAULT_LOOKBACK_DAYS);
   return { startDate, endDate };
 }
 
@@ -55,15 +72,25 @@ export async function getTransaction(id: string, userId: string) {
 }
 
 // ── Write ─────────────────────────────────────────────────────────────────────
+//
+// SECURITY: both functions require userId and verify (in the repository)
+// that every accountId referenced actually belongs to that user before any
+// row is inserted. This closes the IDOR gap where a client could previously
+// create a transaction against an arbitrary accountId. See
+// AccountOwnershipError in transaction-repository.ts.
 
-export async function createTransaction(values: Omit<InsertPayload, "id">) {
-  return insertTransaction(values);
+export async function createTransaction(
+  userId: string,
+  values: Omit<InsertPayload, "id">
+) {
+  return insertTransaction(userId, values);
 }
 
 export async function createManyTransactions(
+  userId: string,
   rows: Omit<InsertPayload, "id">[]
 ) {
-  return insertManyTransactions(rows);
+  return insertManyTransactions(userId, rows);
 }
 
 export async function editTransaction(

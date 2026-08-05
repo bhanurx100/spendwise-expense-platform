@@ -25,12 +25,15 @@ import {
   type BulkDeleteInput,
 } from "./transactions-api";
 import { transactionKeys, summaryKeys } from "./query-keys";
+import { accountKeys } from "@/src/features/accounts/api/query-keys";
 
 // ─── Shared invalidation helper ────────────────────────────────────────────────
 
 /**
  * Invalidate all caches that a write operation affects.
- * Always invalidates: transaction list + summary.
+ * Always invalidates: transaction list + summary + accounts (balances are
+ * derived from transactions, so any write can change every account's
+ * displayed balance).
  * Optionally invalidates: specific transaction detail (when id provided).
  */
 export async function invalidateAfterWrite(
@@ -40,6 +43,7 @@ export async function invalidateAfterWrite(
   const targets = [
     transactionKeys.all,
     summaryKeys.all,
+    accountKeys.all,
     ...(id ? [transactionKeys.detail(id)] : []),
   ];
 
