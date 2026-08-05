@@ -76,7 +76,7 @@ export interface CategorySummary {
   icon: string
   amount: number
   percent: number
-  color: string
+  //color: string
   budget?: number
   trend?: number
   merchantCount?: number
@@ -194,7 +194,6 @@ export interface Bill {
   name: string
   provider: string
   icon: string
-  color: string
   amount: number
   dueLabel: string
   autopay: boolean
@@ -218,4 +217,12 @@ export interface CategoryPageSummary {
   changePercent: number
   month: string
   currency: Currency
+}
+
+export interface CategoryIcon {
+name: string
+  className?: string
+  color?: string
+  index?: number
+  merchant: string
 }
