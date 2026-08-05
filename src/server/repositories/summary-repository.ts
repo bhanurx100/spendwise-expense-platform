@@ -41,9 +41,10 @@ export type CategoryTotalRow = {
 };
 
 export type DailyTotalRow = {
-  date:     Date;
-  income:   number;
-  expenses: number;
+  date:             Date;
+  income:           number;
+  expenses:         number;
+  transactionCount: number;
 };
 
 // ─── Shared WHERE builder — avoids repeating the same and() block 3× ──────────
@@ -127,19 +128,44 @@ export const summaryRepository = {
    * Daily income + expense totals for chart rendering.
    * Returns only days that have transactions — the service fills gaps.
    * Expenses are returned as positive values (ABS applied in SQL).
+   *
+   * BUG FIX: this used to `GROUP BY transactions.date` on the raw
+   * `timestamp` column. `transactions.date` stores a full timestamp
+   * (the seed generator assigns each transaction a distinct time-of-day
+   * via `atTime()`), so grouping by the literal column grouped almost
+   * nothing — every transaction on a given calendar day got its own
+   * "day" row because its timestamp differed by minutes/hours from its
+   * neighbors. The service layer then collapsed those same-day rows
+   * into one Map entry keyed by calendar day, and `Map.set()` on a
+   * repeated key *overwrites* rather than adds — so only the LAST
+   * transaction of any day with more than one transaction survived,
+   * silently discarding every other transaction's contribution to that
+   * day's income/expense total. This is what made the Overview's Cash
+   * Flow card (₹301 income for a month with real salary + other income
+   * transactions in it) disagree with the Calendar, which aggregates
+   * the same transactions correctly because it sums per-day itself.
+   *
+   * Fix: truncate to the calendar day *in SQL*, so one row per day
+   * comes back already fully aggregated — nothing left for the client
+   * to accidentally overwrite. `transactionCount` is added so callers
+   * (e.g. the Calendar) can build UI (activity dots, "N transactions")
+   * from this canonical row without a second, independent transaction
+   * fetch + client-side aggregation.
    */
   async getDailyTotals(
     params: SummaryDbParams
   ): Promise<DailyTotalRow[]> {
     const { startDate, endDate, accountId, userId } = params;
+    const day = sql<Date>`date_trunc('day', ${transactions.date})`;
 
     return db
       .select({
-        date: transactions.date,
+        date: day,
         income: sql`SUM(CASE WHEN ${transactions.amount} >= 0 THEN ${transactions.amount} ELSE 0 END)`
           .mapWith(Number),
         expenses: sql`SUM(CASE WHEN ${transactions.amount} < 0 THEN ABS(${transactions.amount}) ELSE 0 END)`
           .mapWith(Number),
+        transactionCount: sql<number>`COUNT(*)`.mapWith(Number),
       })
       .from(transactions)
       .innerJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -151,7 +177,7 @@ export const summaryRepository = {
           lte(transactions.date, endDate),
         )
       )
-      .groupBy(transactions.date)
-      .orderBy(transactions.date);
+      .groupBy(day)
+      .orderBy(day);
   },
 };

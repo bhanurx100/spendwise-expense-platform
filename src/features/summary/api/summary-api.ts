@@ -19,6 +19,7 @@ export type SummaryDay = {
   date: string;
   income: number;
   expenses: number;
+  transactionCount: number;
 };
 
 export type SummaryCategory = {
