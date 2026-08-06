@@ -74,7 +74,7 @@ export function AuthExperience({ callbackUrl, initialErrorCode }: AuthExperience
   async function handleDemo() {
     setDemoError(null); setGeneralError(null); setDemoLoading(true)
     console.log("Attempting demo login")
-    const result = await signIn("demo", { email: "demo@splitfin.app", password: "Demo@123", redirect: false, callbackUrl })
+    const result = await signIn("demo", { email: "demo@splitfin.app", password: "demo123", redirect: false, callbackUrl })
     console.log("Demo login result:", result)
     setDemoLoading(false)
     if (result?.error) {

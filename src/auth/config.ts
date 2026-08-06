@@ -43,6 +43,7 @@ export const authConfig: NextAuthConfig = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
 
     // Demo account only. Never shown as a public "sign in with password"
@@ -69,4 +70,5 @@ export const authConfig: NextAuthConfig = {
   callbacks: authCallbacks,
 
   trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
 };
