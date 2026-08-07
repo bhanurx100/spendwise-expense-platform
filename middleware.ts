@@ -16,13 +16,27 @@ const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
+  const isAuthPage = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+
   const isPublic =
-    PUBLIC_ROUTES.some((route) => pathname.startsWith(route)) ||
+    isAuthPage ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/icon") ||
     pathname.startsWith("/apple-icon");
+
+  // Signed-in users hitting /sign-in should land on the dashboard — avoids
+  // a confusing "already in, still on sign-in" state without creating loops
+  // (dashboard is protected; auth pages stay public for signed-out users).
+  if (isAuthPage && req.auth) {
+    const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
+    const dest =
+      callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+        ? callbackUrl
+        : "/";
+    return NextResponse.redirect(new URL(dest, req.nextUrl.origin));
+  }
 
   if (isPublic) return NextResponse.next();
 
