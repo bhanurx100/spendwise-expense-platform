@@ -8,6 +8,11 @@ import type { DefaultSession } from "next-auth";
  * subject ID. Business code should only ever read `session.user.id`.
  */
 declare module "next-auth" {
+  interface User {
+    isDemo?: boolean;
+    status?: string;
+  }
+
   interface Session {
     user: {
       id: string;
@@ -15,4 +20,12 @@ declare module "next-auth" {
       status?: string;
     } & DefaultSession["user"];
   }
+
+  interface JWT {
+    id?: string;
+    isDemo?: boolean;
+    status?: string;
+  }
 }
+
+export {};

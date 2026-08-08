@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 
+import { DEMO_ACCOUNT } from "@/src/config/demo-credentials"
 import { SessionContextNotice } from "./ui/SessionContextNotice"
 import { SuccessTransition } from "./ui/SuccessTransition"
 import { MethodRow } from "./ui/MethodRow"
@@ -65,24 +66,45 @@ export function AuthExperience({ callbackUrl, initialErrorCode }: AuthExperience
     setGoogleError(null)
     setGeneralError(null)
     setGoogleLoading(true)
+    console.log("[GOOGLE] client signIn starting, callbackUrl=", callbackUrl)
     await signIn("google", { callbackUrl })
     // No further state update needed/possible — the browser navigates to
     // Google's own domain from here.
   }
 
-  // inside the component:
   async function handleDemo() {
-    setDemoError(null); setGeneralError(null); setDemoLoading(true)
-    console.log("Attempting demo login")
-    const result = await signIn("demo", { email: "demo@splitfin.app", password: "demo123", redirect: false, callbackUrl })
-    console.log("Demo login result:", result)
+    setDemoError(null)
+    setGeneralError(null)
+    setDemoLoading(true)
+    console.log("[DEMO] client signIn starting")
+    const result = await signIn("demo", {
+      email: DEMO_ACCOUNT.email,
+      password: DEMO_ACCOUNT.password,
+      redirect: false,
+      callbackUrl,
+    })
+    console.log("[DEMO] client signIn result=", result)
     setDemoLoading(false)
     if (result?.error) {
-      console.error("Demo login error:", result.error)
-      setDemoError({ target: "demo", message: result.error, action: "Try again" })
+      console.error("[DEMO] client signIn error=", result.error)
+      const guidance = getInlineGuidance(result.error) ?? {
+        target: "demo" as const,
+        message: "The demo account isn't reachable right now.",
+        action: "Try again",
+      }
+      setDemoError({ ...guidance, target: "demo" })
       return
     }
-    console.log("Demo login successful, navigating to:", callbackUrl)
+    if (!result?.ok) {
+      console.error("[DEMO] client signIn not ok", result)
+      setDemoError({
+        target: "demo",
+        message: "The demo account isn't reachable right now.",
+        action: "Try again",
+      })
+      return
+    }
+    console.log("[DEMO] client signIn ok, navigating to", callbackUrl)
     router.push(callbackUrl)
     router.refresh()
   }

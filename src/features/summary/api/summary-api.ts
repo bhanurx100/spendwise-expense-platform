@@ -55,9 +55,16 @@ export async function getSummary(
     },
   });
 
-  if (!response.ok) throw new Error("Failed to fetch summary.");
+  if (!response.ok) {
+    console.error("[SUMMARY] fetch failed status=", response.status);
+    throw new Error(`Failed to fetch summary (${response.status}).`);
+  }
 
   const { data } = await response.json();
+  if (!data) {
+    console.error("[SUMMARY] response missing data payload");
+    throw new Error("Failed to fetch summary.");
+  }
 
   return {
     remainingAmount: convertAmountFromMilliunits(data.remainingAmount),

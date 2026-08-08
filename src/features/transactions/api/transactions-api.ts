@@ -64,9 +64,16 @@ export async function getTransactions(
     },
   });
 
-  if (!response.ok) throw new Error("Failed to fetch transactions.");
+  if (!response.ok) {
+    console.error("[TRANSACTIONS] fetch failed status=", response.status);
+    throw new Error(`Failed to fetch transactions (${response.status}).`);
+  }
 
   const { data } = await response.json();
+  if (!Array.isArray(data)) {
+    console.error("[TRANSACTIONS] response data is not an array");
+    throw new Error("Failed to fetch transactions.");
+  }
 
   return data.map((tx) => ({
     ...tx,

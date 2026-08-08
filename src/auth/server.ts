@@ -52,5 +52,9 @@ export class AuthRequiredError extends Error {
  */
 export async function requireHonoUser(_ctx: Context) {
   const session = await auth();
-  return session?.user?.id ? session.user : null;
+  if (!session?.user?.id) {
+    console.warn("[AUTH] requireHonoUser — unauthenticated request");
+    return null;
+  }
+  return session.user;
 }

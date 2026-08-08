@@ -90,6 +90,7 @@ export function useFinancialView(range?: FinancialViewRange) {
       id: key, month: format(new Date(`${key}-01T00:00:00`), 'MMMM'), year: Number(key.slice(0, 4)),
       totalSpent: rows.filter((row) => row.type === 'expense').reduce((sum, row) => sum + row.amount, 0), currency, transactions: rows,
     }))
+    // Cash flow is derived from the same /api/summary `days` series — no mock data.
     const cashFlow = (['1M', '3M', '6M', '1Y'] as CashFlowPeriod[]).reduce((result, period) => {
       const now = new Date()
       const periodMap: Record<CashFlowPeriod, Date> = {
@@ -99,8 +100,16 @@ export function useFinancialView(range?: FinancialViewRange) {
         '1Y': new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()),
       }
       const cutoffDate = periodMap[period]
-      const filteredDays = (summary.data?.days ?? []).filter((day) => new Date(day.date) >= cutoffDate)
-      result[period] = filteredDays.map((day) => ({ dateKey: day.date.slice(0, 10), label: format(new Date(day.date), 'd MMM'), inflow: day.income, outflow: day.expenses }))
+      const filteredDays = (summary.data?.days ?? []).filter((day) => {
+        const dayDate = new Date(day.date)
+        return !Number.isNaN(dayDate.getTime()) && dayDate >= cutoffDate
+      })
+      result[period] = filteredDays.map((day) => ({
+        dateKey: day.date.slice(0, 10),
+        label: format(new Date(day.date), 'd MMM'),
+        inflow: day.income,
+        outflow: day.expenses,
+      }))
       return result
     }, {} as Record<CashFlowPeriod, { dateKey: string; label: string; inflow: number; outflow: number }[]>)
     const insight: Insight = categoryViews.length ? {

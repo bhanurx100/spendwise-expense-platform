@@ -8,7 +8,7 @@
  *  3. No logic changes — behavior identical
  */
 
-import { differenceInDays, parse, subDays, eachDayOfInterval, endOfDay } from "date-fns";
+import { differenceInDays, parse, subDays, eachDayOfInterval, endOfDay, format } from "date-fns";
 import { DEFAULT_LOOKBACK_DAYS } from "@/src/lib/date-ranges";
 import { calculatePercentageChange } from "@/src/lib/utils";
 import { summaryRepository } from "@/src/server/repositories/summary-repository";
@@ -48,38 +48,34 @@ function inclusiveEndDate(raw: string | undefined, parsed: Date): Date {
   return raw ? endOfDay(parsed) : parsed;
 }
 
+/** Calendar-day key that does not depend on local timezone offset. */
+function toUtcDateKey(d: Date): string {
+  return format(
+    new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())),
+    "yyyy-MM-dd"
+  );
+}
+
 /**
  * Fill gaps so chart data has a point for every day in the range.
  *
  * OPTIMIZED: Build a Map<dateKey, row> once (O(n)) then look up each calendar
  * day in O(1), instead of Array.find() which is O(n) per day → O(n²) total.
  *
- * For a 90-day range with 60 active days the old code did up to 5,400
- * comparisons; this version does exactly 90 + 60 = 150 operations.
- *
- * BUG FIX: the repository now returns at most one row per calendar day
- * (grouped in SQL), so this should never actually see two rows with the
- * same date key — but it previously used `Map.set()` to build `byDate`,
- * which *overwrites* on a repeated key instead of adding. That silently
- * discarded data any time the repository returned more than one row for
- * the same day (which is exactly what was happening before the
- * repository fix, since it grouped by full timestamp, not by day).
  * Accumulating here instead of overwriting makes this function correct
- * on its own, independent of whatever the repository's grouping does —
- * so a future regression there degrades gracefully instead of silently
- * losing income/expense data again.
+ * on its own, independent of whatever the repository's grouping does.
  */
 function fillMissingDays(
   activeDays: { date: Date; income: number; expenses: number; transactionCount: number }[],
   startDate:  Date,
   endDate:    Date
 ): { date: string; income: number; expenses: number; transactionCount: number }[] {
+  // Preserve empty-state UX for Calendar / Cash Flow when there is no activity.
   if (!activeDays.length) return [];
 
-  // Build O(1) lookup by ISO date string key — accumulate, never overwrite.
   const byDate = new Map<string, { income: number; expenses: number; transactionCount: number }>();
   for (const row of activeDays) {
-    const key = row.date.toISOString().slice(0, 10);
+    const key = toUtcDateKey(row.date);
     const existing = byDate.get(key) ?? { income: 0, expenses: 0, transactionCount: 0 };
     existing.income += row.income;
     existing.expenses += row.expenses;
@@ -88,10 +84,10 @@ function fillMissingDays(
   }
 
   return eachDayOfInterval({ start: startDate, end: endDate }).map((day) => {
-    const key   = day.toISOString().slice(0, 10);
+    const key   = toUtcDateKey(day);
     const found = byDate.get(key);
     return {
-      date:             day.toISOString(),
+      date:             `${key}T00:00:00.000Z`,
       income:           found?.income   ?? 0,
       expenses:         found?.expenses ?? 0,
       transactionCount: found?.transactionCount ?? 0,
@@ -139,6 +135,17 @@ export const summaryService = {
       summaryRepository.getCategoryTotals(baseParams),
       summaryRepository.getDailyTotals(baseParams),
     ]);
+
+    console.log(
+      "[SUMMARY] userId=",
+      userId,
+      "daysWithActivity=",
+      activeDays.length,
+      "income=",
+      current.income,
+      "expenses=",
+      current.expenses
+    );
 
     // Category bucketing: top 3 named + "Other"
     const topCategories   = rawCategories.slice(0, 3);
