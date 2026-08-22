@@ -1,57 +1,35 @@
-import { auth } from "@/src/auth/server";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * middleware.ts
  *
- * Replaces Clerk's `clerkMiddleware` + `createRouteMatcher(["/"])`, which
- * only protected the root route. This protects every route under the
- * (dashboard) group — accounts, categories, transactions, splitpay, and the
- * overview — while leaving (auth) and any future public/onboarding routes
- * open. API routes handle their own auth via `requireHonoUser` (see
- * src/auth/server.ts) since they need JSON 401s, not redirects.
+ * Minimal middleware that ensures API auth routes and public files are accessible.
+ * Auth gating for dashboard pages is handled by the ProtectedRoute component.
  */
-const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/api/auth"];
 
-export default auth((req) => {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const isAuthPage = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  // Allow public paths through
+  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
 
-  const isPublic =
-    isAuthPage ||
-    pathname.startsWith("/api/auth") ||
+  // Allow static files, _next, favicon
+  if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/icon") ||
-    pathname.startsWith("/apple-icon");
-
-  // Signed-in users hitting /sign-in should land on the dashboard — avoids
-  // a confusing "already in, still on sign-in" state without creating loops
-  // (dashboard is protected; auth pages stay public for signed-out users).
-  if (isAuthPage && req.auth) {
-    const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
-    const dest =
-      callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
-        ? callbackUrl
-        : "/";
-    return NextResponse.redirect(new URL(dest, req.nextUrl.origin));
-  }
-
-  if (isPublic) return NextResponse.next();
-
-  // API routes: let the route handler return its own 401 JSON via
-  // requireHonoUser — a redirect here would break fetch/XHR callers.
-  if (pathname.startsWith("/api")) return NextResponse.next();
-
-  if (!req.auth) {
-    const signInUrl = new URL("/sign-in", req.nextUrl.origin);
-    signInUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(signInUrl);
+    pathname.startsWith("/apple-icon") ||
+    pathname.match(/\.[\w]+$/)
+  ) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
